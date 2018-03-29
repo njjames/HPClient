@@ -54,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText mEtSignUsername;
     private ImageView mIvSignHead;
     private int headPic = 1;
+    private boolean mIsFinding = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -192,9 +193,21 @@ public class MainActivity extends AppCompatActivity {
                     loginView();
                     break;
                 case R.id.btn_logout:
+                    //注销时关闭socket连接
+                    mClient.close();
+                    //显示登录界面，此时登录socket已经断开，会报异常，然后执行onDeline的回调方法，重新连接
                     loginView();
                     break;
                 case R.id.btn_findgame:
+                    if (mIsFinding) {
+                        mBtnFindGame.setText("取消匹配");
+                        mClient.cancelFind();
+                        mIsFinding = false;
+                    }else {
+                        mBtnFindGame.setText("开始匹配");
+                        mClient.findGame();
+                        mIsFinding = true;
+                    }
                     break;
             }
         }
@@ -247,6 +260,7 @@ public class MainActivity extends AppCompatActivity {
      * 显示可匹配的界面，包含用户信息
      */
     private void menuView() {
+        mIsFinding = false;
         //如果当前显示不是这个界面，则让这个界面显示，并获取到每个控件
         if (thisView != MENU_VIEW) {
             thisView = MENU_VIEW;

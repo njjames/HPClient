@@ -32,6 +32,7 @@ public class Client implements Runnable {
     private final ExecutorService mEs;
     private boolean isConnect;
     private Socket mSocket;
+    private Game mGame;
 
     private User mUser;
 
@@ -68,6 +69,7 @@ public class Client implements Runnable {
         this.mClientListener = clientListener;
         //初始化线程池
         mEs = Executors.newFixedThreadPool(5);
+        mGame = new Game();
     }
 
     public void connect() {
@@ -105,11 +107,22 @@ public class Client implements Runnable {
                     case "signback":
                         signBack(content);
                         break;
+                    case "game":
+                        receiveGameData(content);
+                        break;
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 接收服务器返回的游戏信息
+     * @param content
+     */
+    private void receiveGameData(String content) {
+
     }
 
     /**
@@ -123,6 +136,21 @@ public class Client implements Runnable {
         } catch (Exception e) {
             mHandler.sendEmptyMessage(ON_SIGN_FAILED);
         }
+    }
+
+    private void sendLine(final String data) {
+        //给服务器端发数据需要在子线程中执行
+        mEs.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    OutputStream os = mSocket.getOutputStream();
+                    os.write((data + "\r\n").getBytes("utf8"));
+                } catch (Exception e) {
+                    deLine();
+                }
+            }
+        });
     }
 
     /**
@@ -149,19 +177,12 @@ public class Client implements Runnable {
         sendLine("sign:" + mUser.toString());
     }
 
-    private void sendLine(final String data) {
-        //给服务器端发数据需要在子线程中执行
-        mEs.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    OutputStream os = mSocket.getOutputStream();
-                    os.write((data + "\r\n").getBytes("utf8"));
-                } catch (Exception e) {
-                    deLine();
-                }
-            }
-        });
+    public void findGame() {
+        sendLine("findgame");
+    }
+
+    public void cancelFind() {
+        sendLine("cancelfind");
     }
 
     private void deLine() {
@@ -175,6 +196,17 @@ public class Client implements Runnable {
 
     public void setUser(User user) {
         this.mUser = user;
+    }
+
+    /**
+     * 注销时关闭
+     */
+    public void close() {
+        try {
+            mSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public interface ClientListener {
