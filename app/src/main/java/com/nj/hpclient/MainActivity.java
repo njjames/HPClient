@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
     private User mLocalUser;
     private int thisView;
     private Button mBtnLogout;
-    private Button mFindGame;
+    private Button mBtnFindGame;
     private TextView mTvUsername;
     private TextView mTvScore;
     private TextView mTvVicount;
@@ -189,6 +189,12 @@ public class MainActivity extends AppCompatActivity {
                     mBtnSignCancel.setEnabled(false);
                     break;
                 case R.id.btn_sign_cancel:
+                    loginView();
+                    break;
+                case R.id.btn_logout:
+                    loginView();
+                    break;
+                case R.id.btn_findgame:
                     break;
             }
         }
@@ -246,13 +252,15 @@ public class MainActivity extends AppCompatActivity {
             thisView = MENU_VIEW;
             setContentView(R.layout.layout_menu);
             mBtnLogout = findViewById(R.id.btn_logout);
-            mFindGame = findViewById(R.id.btn_findgame);
+            mBtnFindGame = findViewById(R.id.btn_findgame);
             mTvUsername = findViewById(R.id.tv_username);
             mTvScore = findViewById(R.id.tv_score);
             mTvVicount = findViewById(R.id.tv_vicount);
             mTvDecount = findViewById(R.id.tv_decount);
             mTvDrcount = findViewById(R.id.tv_drcount);
             mIvHead = findViewById(R.id.iv_head);
+            mBtnLogout.setOnClickListener(mClickListener);
+            mBtnFindGame.setOnClickListener(mClickListener);
         }
         //如果当前显示的就是这个界面，直接加载数据
         int head = Integer.parseInt(mLocalUser.getHead());

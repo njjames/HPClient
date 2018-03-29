@@ -1,4 +1,4 @@
-﻿package com.nj.hpclient;
+package com.nj.hpclient;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -40,43 +40,43 @@ public class Img {
 	public static Bitmap HEAD14;
 
 	public static void init(Context context) {
-//		BG = BitmapFactory
-//				.decodeResource(context.getResources(), R.drawable.bg);
-//
-//		BOARD = BitmapFactory.decodeResource(context.getResources(),
-//				R.drawable.board);
-//		OOS = BitmapFactory.decodeResource(context.getResources(),
-//				R.drawable.oos);
+		//		BG = BitmapFactory
+		//				.decodeResource(context.getResources(), R.drawable.bg);
+		//
+		//		BOARD = BitmapFactory.decodeResource(context.getResources(),
+		//				R.drawable.board);
+		//		OOS = BitmapFactory.decodeResource(context.getResources(),
+		//				R.drawable.oos);
 
-//		BA = BitmapFactory
-//				.decodeResource(context.getResources(), R.drawable.ba);
-//		BB = BitmapFactory
-//				.decodeResource(context.getResources(), R.drawable.bb);
-//		BC = BitmapFactory
-//				.decodeResource(context.getResources(), R.drawable.bc);
-//		BK = BitmapFactory
-//				.decodeResource(context.getResources(), R.drawable.bk);
-//		BN = BitmapFactory
-//				.decodeResource(context.getResources(), R.drawable.bn);
-//		BP = BitmapFactory
-//				.decodeResource(context.getResources(), R.drawable.bp);
-//		BR = BitmapFactory
-//				.decodeResource(context.getResources(), R.drawable.br);
-//
-//		RA = BitmapFactory
-//				.decodeResource(context.getResources(), R.drawable.ra);
-//		RB = BitmapFactory
-//				.decodeResource(context.getResources(), R.drawable.rb);
-//		RC = BitmapFactory
-//				.decodeResource(context.getResources(), R.drawable.rc);
-//		RK = BitmapFactory
-//				.decodeResource(context.getResources(), R.drawable.rk);
-//		RN = BitmapFactory
-//				.decodeResource(context.getResources(), R.drawable.rn);
-//		RP = BitmapFactory
-//				.decodeResource(context.getResources(), R.drawable.rp);
-//		RR = BitmapFactory
-//				.decodeResource(context.getResources(), R.drawable.rr);
+		//		BA = BitmapFactory
+		//				.decodeResource(context.getResources(), R.drawable.ba);
+		//		BB = BitmapFactory
+		//				.decodeResource(context.getResources(), R.drawable.bb);
+		//		BC = BitmapFactory
+		//				.decodeResource(context.getResources(), R.drawable.bc);
+		//		BK = BitmapFactory
+		//				.decodeResource(context.getResources(), R.drawable.bk);
+		//		BN = BitmapFactory
+		//				.decodeResource(context.getResources(), R.drawable.bn);
+		//		BP = BitmapFactory
+		//				.decodeResource(context.getResources(), R.drawable.bp);
+		//		BR = BitmapFactory
+		//				.decodeResource(context.getResources(), R.drawable.br);
+		//
+		//		RA = BitmapFactory
+		//				.decodeResource(context.getResources(), R.drawable.ra);
+		//		RB = BitmapFactory
+		//				.decodeResource(context.getResources(), R.drawable.rb);
+		//		RC = BitmapFactory
+		//				.decodeResource(context.getResources(), R.drawable.rc);
+		//		RK = BitmapFactory
+		//				.decodeResource(context.getResources(), R.drawable.rk);
+		//		RN = BitmapFactory
+		//				.decodeResource(context.getResources(), R.drawable.rn);
+		//		RP = BitmapFactory
+		//				.decodeResource(context.getResources(), R.drawable.rp);
+		//		RR = BitmapFactory
+		//				.decodeResource(context.getResources(), R.drawable.rr);
 
 		HEAD1 = BitmapFactory.decodeResource(context.getResources(),
 				R.drawable.head1);
@@ -110,36 +110,36 @@ public class Img {
 
 	public static Bitmap getHead(int h) {
 		switch (h) {
-		case 1:
-			return HEAD1;
-		case 2:
-			return HEAD2;
-		case 3:
-			return HEAD3;
-		case 4:
-			return HEAD4;
-		case 5:
-			return HEAD5;
-		case 6:
-			return HEAD6;
-		case 7:
-			return HEAD7;
-		case 8:
-			return HEAD8;
-		case 9:
-			return HEAD9;
-		case 10:
-			return HEAD10;
-		case 11:
-			return HEAD11;
-		case 12:
-			return HEAD12;
-		case 13:
-			return HEAD13;
-		case 14:
-			return HEAD14;
-		default:
-			return null;
+			case 1:
+				return HEAD1;
+			case 2:
+				return HEAD2;
+			case 3:
+				return HEAD3;
+			case 4:
+				return HEAD4;
+			case 5:
+				return HEAD5;
+			case 6:
+				return HEAD6;
+			case 7:
+				return HEAD7;
+			case 8:
+				return HEAD8;
+			case 9:
+				return HEAD9;
+			case 10:
+				return HEAD10;
+			case 11:
+				return HEAD11;
+			case 12:
+				return HEAD12;
+			case 13:
+				return HEAD13;
+			case 14:
+				return HEAD14;
+			default:
+				return null;
 		}
 	}
 }
