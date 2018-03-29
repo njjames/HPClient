@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:padding="50dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_margin="10dp"
+        android:gravity="center">
+
+        <Button
+            android:id="@+id/btn_sign_prehead"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/headpre"
+            android:layout_gravity="center_vertical"/>
+
+        <ImageView
+            android:id="@+id/iv_sign_head"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/head1"
+            android:layout_margin="10dp"/>
+
+        <Button
+            android:id="@+id/btn_sign_nexthead"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/headnext"
+            android:layout_gravity="center_vertical"/>
+    </LinearLayout>
+
+
+
+    <EditText
+        android:id="@+id/et_sign_username"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="请输入用户名"/>
+
+    <EditText
+        android:id="@+id/et_sign_password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="请输入密码"
+        android:inputType="textPassword"/>
+
+    <EditText
+        android:id="@+id/et_sign_repassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="请确认密码"
+        android:inputType="textPassword"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp">
+
+        <Button
+            android:id="@+id/btn_sign_confirm"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="注册"/>
+
+        <Button
+            android:id="@+id/btn_sign_cancel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="返回"/>
+    </LinearLayout>
+
+</LinearLayout>

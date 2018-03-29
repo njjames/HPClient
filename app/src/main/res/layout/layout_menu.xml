@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#ccc">
+
+    <Button
+        android:id="@+id/btn_logout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="退出"
+        android:layout_gravity="right"/>
+
+    <ImageView
+        android:id="@+id/iv_head"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/head1"
+        android:layout_gravity="center_horizontal"
+        android:layout_margin="10dp"/>
+
+    <TextView
+        android:id="@+id/tv_username"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="用户名："
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="10dp"
+        android:textSize="20sp"/>
+    <TextView
+        android:id="@+id/tv_score"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="分数："
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="10dp"
+        android:textSize="20sp"/>
+    <TextView
+        android:id="@+id/tv_vicount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="胜场："
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="10dp"
+        android:textSize="20sp"/>
+    <TextView
+        android:id="@+id/tv_decount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="负场："
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="10dp"
+        android:textSize="20sp"/>
+    <TextView
+        android:id="@+id/tv_drcount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="平场："
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="10dp"
+        android:textSize="20sp"/>
+
+    <Button
+        android:id="@+id/btn_findgame"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="开始匹配"
+        android:textSize="30sp"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center"
+        android:layout_marginTop="15dp"/>
+
+</LinearLayout>
