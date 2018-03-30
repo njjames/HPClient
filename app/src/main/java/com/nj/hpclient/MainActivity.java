@@ -27,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            mClient = new Client("192.169.16.122", 9898, mClientListener);
+            mClient = new Client("192.168.16.122", 9898, mClientListener);
             mClient.connect();
         }
     };
@@ -59,6 +59,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //初始化图片，否则图片显示不出来
+        Img.init(this);
         setContentView(R.layout.layout_start);
         mClientListener = new MyClientListener();
         mClickListener = new MyClickListener();
@@ -127,6 +129,11 @@ public class MainActivity extends AppCompatActivity {
             //再次显示注册界面
             signView();
         }
+
+        @Override
+        public void onStart() {
+
+        }
     }
 
     private class MyClickListener implements View.OnClickListener {
@@ -183,6 +190,10 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(MainActivity.this, "确认密码不能为空", Toast.LENGTH_SHORT).show();
                         return;
                     }
+                    if (!signPassword.equals(signRepassword)) {
+                        Toast.makeText(MainActivity.this, "密码与确认密码不能为空", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     mLocalUser = new User(signUsername, signPassword, headPic + "");
                     mClient.setUser(mLocalUser);
                     mClient.sign();
@@ -194,9 +205,14 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case R.id.btn_logout:
                     //注销时关闭socket连接
+//                    mClient.close(); //这里不能关闭，否则再次登录和注册时都会报异常，登录报异常，登录的永远是本地的用户，注册也注册不成功，登录的还是本地用户
+                    //还必须要close
+                    removeLocalUser();
                     mClient.close();
                     //显示登录界面，此时登录socket已经断开，会报异常，然后执行onDeline的回调方法，重新连接
-                    loginView();
+                    //不能直接显示登录界面，否则点击登录之后还会显示一次登录界面，也就是需要点两次登录才能真正的登录
+                    //loginView();
+                    mClient.deLine();
                     break;
                 case R.id.btn_findgame:
                     if (mIsFinding) {
@@ -310,7 +326,7 @@ public class MainActivity extends AppCompatActivity {
             User user = new User();
             user.setName(username);
             user.setPassword(SPUtil.getString(this, "password", ""));
-            user.setHead(SPUtil.getInt(this, "head", 0) + "");
+            user.setHead(SPUtil.getString(this, "head", "1"));
             user.setScore(SPUtil.getInt(this, "score", 0));
             user.setViCount(SPUtil.getInt(this, "vicount", 0));
             user.setDeCount(SPUtil.getInt(this, "decount", 0));
@@ -318,6 +334,10 @@ public class MainActivity extends AppCompatActivity {
             return user;
         }
         return null;
+    }
+
+    private void removeLocalUser() {
+        SPUtil.clear(this);
     }
 
 }

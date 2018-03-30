@@ -78,34 +78,20 @@ public class Img {
 		//		RR = BitmapFactory
 		//				.decodeResource(context.getResources(), R.drawable.rr);
 
-		HEAD1 = BitmapFactory.decodeResource(context.getResources(),
-				R.drawable.head1);
-		HEAD2 = BitmapFactory.decodeResource(context.getResources(),
-				R.drawable.head2);
-		HEAD3 = BitmapFactory.decodeResource(context.getResources(),
-				R.drawable.head3);
-		HEAD4 = BitmapFactory.decodeResource(context.getResources(),
-				R.drawable.head4);
-		HEAD5 = BitmapFactory.decodeResource(context.getResources(),
-				R.drawable.head5);
-		HEAD6 = BitmapFactory.decodeResource(context.getResources(),
-				R.drawable.head6);
-		HEAD7 = BitmapFactory.decodeResource(context.getResources(),
-				R.drawable.head7);
-		HEAD8 = BitmapFactory.decodeResource(context.getResources(),
-				R.drawable.head8);
-		HEAD9 = BitmapFactory.decodeResource(context.getResources(),
-				R.drawable.head9);
-		HEAD10 = BitmapFactory.decodeResource(context.getResources(),
-				R.drawable.head10);
-		HEAD11 = BitmapFactory.decodeResource(context.getResources(),
-				R.drawable.head11);
-		HEAD12 = BitmapFactory.decodeResource(context.getResources(),
-				R.drawable.head12);
-		HEAD13 = BitmapFactory.decodeResource(context.getResources(),
-				R.drawable.head13);
-		HEAD14 = BitmapFactory.decodeResource(context.getResources(),
-				R.drawable.head14);
+		HEAD1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.head1);
+		HEAD2 = BitmapFactory.decodeResource(context.getResources(), R.drawable.head2);
+		HEAD3 = BitmapFactory.decodeResource(context.getResources(), R.drawable.head3);
+		HEAD4 = BitmapFactory.decodeResource(context.getResources(), R.drawable.head4);
+		HEAD5 = BitmapFactory.decodeResource(context.getResources(), R.drawable.head5);
+		HEAD6 = BitmapFactory.decodeResource(context.getResources(), R.drawable.head6);
+		HEAD7 = BitmapFactory.decodeResource(context.getResources(), R.drawable.head7);
+		HEAD8 = BitmapFactory.decodeResource(context.getResources(), R.drawable.head8);
+		HEAD9 = BitmapFactory.decodeResource(context.getResources(), R.drawable.head9);
+		HEAD10 = BitmapFactory.decodeResource(context.getResources(), R.drawable.head10);
+		HEAD11 = BitmapFactory.decodeResource(context.getResources(), R.drawable.head11);
+		HEAD12 = BitmapFactory.decodeResource(context.getResources(), R.drawable.head12);
+		HEAD13 = BitmapFactory.decodeResource(context.getResources(), R.drawable.head13);
+		HEAD14 = BitmapFactory.decodeResource(context.getResources(), R.drawable.head14);
 	}
 
 	public static Bitmap getHead(int h) {

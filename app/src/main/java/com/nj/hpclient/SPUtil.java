@@ -42,4 +42,12 @@ public class SPUtil {
         return  sp.getInt(key, defValue);
     }
 
+    public static void clear(Context context) {
+        if(sp == null) {
+            sp = context.getSharedPreferences("userconfig", Context.MODE_PRIVATE);
+        }
+        SharedPreferences.Editor editor = sp.edit();
+        editor.clear();
+        editor.commit();
+    }
 }

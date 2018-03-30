@@ -25,6 +25,7 @@ public class Client implements Runnable {
     private static final int ON_LOGIN_SUCCESS = 8;
     private static final int ON_LOGIN_FAILED = 7;
     private static final int ON_SIGN_FAILED = 13;
+    private static final int ON_START = 11;
 
     private String ip;
     private int port;
@@ -59,9 +60,13 @@ public class Client implements Runnable {
                 case ON_SIGN_FAILED:
                     mClientListener.onSignFailed();
                     break;
+                case ON_START:
+                    mClientListener.onStart();
+                    break;
             }
         }
     };
+    private OutputStream mOs;
 
     public Client(String ip, int port, ClientListener clientListener) {
         this.ip = ip;
@@ -107,12 +112,30 @@ public class Client implements Runnable {
                     case "signback":
                         signBack(content);
                         break;
+                    case "user":
+                        receiveUser(content);
+                        break;
                     case "game":
                         receiveGameData(content);
                         break;
                 }
             }
         } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 接收服务器返回的用户信息
+     * @param content
+     */
+    private void receiveUser(String content) {
+        //收到匹配的用户信息之后，开始
+        mHandler.sendEmptyMessage(ON_START);
+        try {
+            //返回的字符串中包含两位玩家的信息，设置给Game对象
+            mGame.setUser(content);
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -144,8 +167,8 @@ public class Client implements Runnable {
             @Override
             public void run() {
                 try {
-                    OutputStream os = mSocket.getOutputStream();
-                    os.write((data + "\r\n").getBytes("utf8"));
+                    mOs = mSocket.getOutputStream();
+                    mOs.write((data + "\r\n").getBytes("utf8"));
                 } catch (Exception e) {
                     deLine();
                 }
@@ -185,7 +208,7 @@ public class Client implements Runnable {
         sendLine("cancelfind");
     }
 
-    private void deLine() {
+    public void deLine() {
         mHandler.sendEmptyMessage(ON_DELINE);
         isConnect = false;
     }
@@ -227,5 +250,8 @@ public class Client implements Runnable {
 
         //注册失败后的回调
         public void onSignFailed();
+
+        //匹配成功后的回调，用来开始游戏
+        public void onStart();
     }
 }
