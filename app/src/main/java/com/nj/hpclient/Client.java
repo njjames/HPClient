@@ -33,7 +33,7 @@ public class Client implements Runnable {
     private final ExecutorService mEs;
     private boolean isConnect;
     private Socket mSocket;
-    private Game mGame;
+    public Game mGame;
 
     private User mUser;
 
@@ -145,7 +145,11 @@ public class Client implements Runnable {
      * @param content
      */
     private void receiveGameData(String content) {
-
+        try {
+            mGame.setData(content);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**

@@ -73,5 +73,15 @@ public class GameUtil {
 	private static int getColor(int code) {
 		return code / 100;
 	}
-	
+
+	public static int[][] mapFromString(String data) {
+		int[][] map = new int[4][4];
+		String[] split = data.split(",");
+		for (int i = 0; i < 4; i++) {
+			for (int j = 0; j < 4; j++) {
+				map[i][j] = Integer.parseInt(split[i * 4 + j]);
+			}
+		}
+		return map;
+	}
 }

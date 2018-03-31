@@ -23,6 +23,8 @@ public class MainActivity extends AppCompatActivity {
 
     private MyClientListener mClientListener;
     private MyClickListener mClickListener;
+    private MyGameViewListener mGameViewListener;
+
     @SuppressLint("HandlerLeak")
     private Handler mHandler = new Handler() {
         @Override
@@ -55,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageView mIvSignHead;
     private int headPic = 1;
     private boolean mIsFinding = false;
+    private GameView mGameView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -132,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onStart() {
-
+            gameView();
         }
     }
 
@@ -226,6 +229,21 @@ public class MainActivity extends AppCompatActivity {
                     }
                     break;
             }
+        }
+    }
+
+    public class MyGameViewListener implements GameView.GameViewListener {
+
+    }
+
+    /**
+     * 显示游戏界面
+     */
+    private void gameView() {
+        if (thisView != GAME_VIEW) {
+            thisView = GAME_VIEW;
+            mGameView = new GameView(this, mClient, mGameViewListener);
+            setContentView(mGameView);
         }
     }
 

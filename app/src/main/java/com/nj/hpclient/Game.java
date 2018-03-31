@@ -33,6 +33,8 @@ public class Game {
     //走棋的步骤
     private ArrayList<Walk> walks;
 
+    private Walk walk;
+
     public Game() {
         super();
     }
@@ -195,5 +197,12 @@ public class Game {
         String[] users = content.split(";");
         user1 = User.fromString(users[0]);
         user2 = User.fromString(users[1]);
+    }
+
+    public void setData(String content) throws Exception {
+        String[] tag = content.split(";");
+        this.step = Integer.parseInt(tag[0]);
+        this.walk = Walk.fromString(tag[1]);
+        this.map = GameUtil.mapFromString(tag[3]);
     }
 }
