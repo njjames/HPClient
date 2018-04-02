@@ -6,21 +6,27 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.Path;
+import android.graphics.Point;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 
 /**
  * Created by Administrator on 2018-03-31.
  */
 
-public class GameView extends SurfaceView implements SurfaceHolder.Callback, Runnable {
+public class GameView extends SurfaceView implements SurfaceHolder.Callback, Runnable, View.OnTouchListener {
+
+    private static final String TAG = "GameView";
 
     private SurfaceHolder mSurfaceHolder;
     private Canvas mCanvas;
     private boolean isDrawing;
-    private float mBoardX;
-    private float mBoardY;
+    private float mBoardLeftX;
+    private float mBoardLeftY;
     private float mDxBoard;
     private float mDxChess;
     private float mChessRadius;
@@ -28,6 +34,11 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
     private int mHeight;
     private Client mClient;
     private GameViewListener mGameViewListener;
+    private boolean canSelect;
+    private float mDxOneBoard;
+    private Point select;
+    private Point mDownPoint;
+
 
     public GameView(Context context) {
         this(context, null);
@@ -46,7 +57,8 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
         this(context);
         this.mClient = client;
         this.mGameViewListener = gameViewListener;
-
+        //必须设置这个，否则不出发点击事件
+        this.setOnTouchListener(this);
     }
 
     private void init() {
@@ -60,11 +72,17 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
     private void initDrawData() {
         mWidth = getWidth();
         mHeight = getHeight();
+        //边框间距
         mDxBoard = 30f;
+        //棋子之前的距离
         mDxChess = 30f;
+        //棋牌的半径
         mChessRadius = (getWidth() - 2 * mDxBoard - 3 * mDxChess) / 8;
-        mBoardX = 10 + mChessRadius;
-        mBoardY = 10 + mChessRadius;
+        //棋盘左上角的坐标
+        mBoardLeftX = 10 + mChessRadius;
+        mBoardLeftY = 10 + mChessRadius;
+        //棋盘每行之间的间距
+        mDxOneBoard = 2 * mChessRadius + mDxChess;
     }
 
     @Override
@@ -110,6 +128,27 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
         drawBG(canvas);
         drawBoard(canvas, paint);
         drawChess(canvas, paint);
+        drawSelect(canvas, paint);
+    }
+
+    /**
+     * 画选择的棋牌的边框或走棋的边框
+     * @param canvas
+     * @param paint
+     */
+    private void drawSelect(Canvas canvas, Paint paint) {
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(10);
+        paint.setColor(Color.GREEN);
+        if (canSelect) {
+            if (select != null) {
+                float initX = mDxBoard + mChessRadius;
+                float initY = mDxBoard + mChessRadius;
+                float x = initX + (select.x - 1)*mDxChess + (select.x - 1)*2*mChessRadius;
+                float y = initY + (select.y - 1)*mDxChess + (select.y - 1)*2*mChessRadius;
+                canvas.drawCircle(x, y, mChessRadius, paint);
+            }
+        }
     }
 
     /**
@@ -126,57 +165,58 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
             paint.setTextSize(80f);
             for (int i = 0; i < 4; i++) {
                 for (int j = 0; j < 4; j++) {
+                    //小于0.说明是没有翻开的牌
+                    if (map[i][j] < 0) {
+                        drawChessBG(j, i, canvas, paint);
+                    }
                     switch (map[i][j]) {
-                        case -1:
-                            drawChessBG(i, j, canvas, paint);
-                            break;
                         case 101:
-                            drawOneChess("鼠", i, j, canvas, paint, 1);
+                            drawOneChess("鼠", j, i, canvas, paint, 1);
                             break;
                         case 102:
-                            drawOneChess("猫", i, j, canvas, paint, 1);
+                            drawOneChess("猫", j, i, canvas, paint, 1);
                             break;
                         case 103:
-                            drawOneChess("狗", i, j, canvas, paint, 1);
+                            drawOneChess("狗", j, i, canvas, paint, 1);
                             break;
                         case 104:
-                            drawOneChess("狼", i, j, canvas, paint, 1);
+                            drawOneChess("狼", j, i, canvas, paint, 1);
                             break;
                         case 105:
-                            drawOneChess("豹", i, j, canvas, paint, 1);
+                            drawOneChess("豹", j, i, canvas, paint, 1);
                             break;
                         case 106:
-                            drawOneChess("虎", i, j, canvas, paint, 1);
+                            drawOneChess("虎", j, i, canvas, paint, 1);
                             break;
                         case 107:
-                            drawOneChess("狮", i, j, canvas, paint, 1);
+                            drawOneChess("狮", j, i, canvas, paint, 1);
                             break;
                         case 108:
-                            drawOneChess("象", i, j, canvas, paint, 1);
+                            drawOneChess("象", j, i, canvas, paint, 1);
                             break;
                         case 201:
-                            drawOneChess("鼠", i, j, canvas, paint, 2);
+                            drawOneChess("鼠", j, i, canvas, paint, 2);
                             break;
                         case 202:
-                            drawOneChess("猫", i, j, canvas, paint, 2);
+                            drawOneChess("猫", j, i, canvas, paint, 2);
                             break;
                         case 203:
-                            drawOneChess("狗", i, j, canvas, paint, 2);
+                            drawOneChess("狗", j, i, canvas, paint, 2);
                             break;
                         case 204:
-                            drawOneChess("狼", i, j, canvas, paint, 2);
+                            drawOneChess("狼", j, i, canvas, paint, 2);
                             break;
                         case 205:
-                            drawOneChess("豹", i, j, canvas, paint, 2);
+                            drawOneChess("豹", j, i, canvas, paint, 2);
                             break;
                         case 206:
-                            drawOneChess("虎", i, j, canvas, paint, 2);
+                            drawOneChess("虎", j, i, canvas, paint, 2);
                             break;
                         case 207:
-                            drawOneChess("狮", i, j, canvas, paint, 2);
+                            drawOneChess("狮", j, i, canvas, paint, 2);
                             break;
                         case 208:
-                            drawOneChess("象", i, j, canvas, paint, 2);
+                            drawOneChess("象", j, i, canvas, paint, 2);
                             break;
                     }
                 }
@@ -263,7 +303,105 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
     private void drawBG(Canvas canvas) {
     }
 
+    public void setCanSelect(boolean canSelect) {
+        this.canSelect = canSelect;
+        select = null;
+    }
+
+    private Point locateXYToMap(float x, float y) {
+        //只有棋盘范围的点才转化
+        if(x >= mDxBoard && x <= mWidth - mDxBoard && y >= mDxBoard && y <= mWidth - mDxBoard) {
+            Point point = new Point();
+            //得到点击位置左上角map中的x，y
+            int leftX = (int) ((x - mBoardLeftX) / mDxOneBoard) + 1;
+            int leftY = (int) ((y - mBoardLeftY) / mDxOneBoard) + 1;
+            float x1 = (x - mBoardLeftX) % mDxOneBoard;
+            float y1 = (y - mBoardLeftY) % mDxOneBoard;
+            if (x1 <= mDxOneBoard / 2 && y1 <= mDxOneBoard / 2) {
+                point.x = leftX;
+                point.y = leftY;
+            } else if (x1 > mDxOneBoard / 2 && y1 <= mDxOneBoard / 2) {
+                point.x = leftX + 1;
+                point.y= leftY;
+            } else if(x1 <= mDxOneBoard / 2 && y1 > mDxOneBoard / 2) {
+                point.x = leftX;
+                point.y = leftY + 1;
+            } else if(x1 > mDxOneBoard / 2 && y1 > mDxOneBoard / 2) {
+                point.x = leftX + 1;
+                point.y = leftY + 1;
+            }
+            return point;
+        }else {
+            return null;
+        }
+
+    }
+
+    @Override
+    public boolean onTouch(View view, MotionEvent motionEvent) {
+        Log.d(TAG, "onTouch: ");
+        int x = (int) motionEvent.getX();
+        int y = (int) motionEvent.getY();
+        switch (motionEvent.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                //按下时记录按下点
+                mDownPoint = new Point(x, y);
+                break;
+            case MotionEvent.ACTION_UP:
+                //如果抬起时，还在一个棋子的范围，就执行onClick方法
+                Point point = locateXYToMap(mDownPoint.x, mDownPoint.y);
+                if (point != null) {
+                    float initX = mDxBoard + mChessRadius;
+                    float initY = mDxBoard + mChessRadius;
+                    float x1 = initX + (point.x - 1) * mDxChess + (point.x - 1) * 2 * mChessRadius;
+                    float y1 = initY + (point.y - 1) * mDxChess + (point.y - 1) * 2 * mChessRadius;
+                    if (Math.abs(x1 - motionEvent.getX()) <mChessRadius && Math.abs(y1 - motionEvent.getY()) <mChessRadius) {
+                        onClick(point.x, point.y);
+                    }
+                }
+                break;
+            case MotionEvent.ACTION_MOVE:
+                break;
+        }
+        //这里要返回true，否则up事件响应不到
+        return true;
+    }
+
+    private void onClick(int x, int y) {
+        if (canSelect) {
+            if (select == null) {
+                //如果点击的是没有翻开的牌，则调用翻牌的回调
+                if (mClient.mGame.getMap()[y-1][x-1] < 0) {
+                    //这个x，y是要传递给服务器的，对应map中的x,y就是正好相反的
+                    mGameViewListener.onSelect(y - 1, x - 1);
+                }else {
+                    //如果玩家是黑方，并且点击的是黑方的棋子
+                    if (mClient.isBlack() && mClient.mGame.getMap()[y - 1][x - 1] / 100 == 1) {
+                        //这个不用相反，是因为这个用来在横纵坐标上显示的
+                        select = new Point(x, y);
+                    }else if(!mClient.isBlack() && mClient.mGame.getMap()[y - 1][x - 1] / 100 == 2) {
+                        select = new Point(x, y);
+                    }
+                }
+            }else {
+                //如果这次点击的是自己这一边的棋牌，则把选择放到这个牌上，否则按照走棋的逻辑走
+                if(mClient.mGame.getMap()[y-1][x-1] / 100 == mClient.mGame.getMap()[select.y-1][select.x-1] / 100) {
+                    select.x = x;
+                    select.y = y;
+                }else {
+                    Walk walk = new Walk(select.y - 1, select.x - 1, y - 1, x - 1);
+                    mGameViewListener.walk(walk);
+                    select = null;
+                    canSelect = false;
+                }
+            }
+        }
+    }
+
     public interface GameViewListener {
 
+        public void walk(Walk walk);
+
+        public void onSelect(int x, int y);
     }
 }

@@ -67,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.layout_start);
         mClientListener = new MyClientListener();
         mClickListener = new MyClickListener();
+        mGameViewListener = new MyGameViewListener();
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -136,6 +137,28 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onStart() {
             gameView();
+        }
+
+        @Override
+        public void onUpdate() {
+            if (mGameView != null) {
+                int step = mClient.mGame.getStep();
+                //如果是黑方，说明单步数走
+                if(mClient.isBlack()) {
+                    if (step % 2 ==0) {
+                        mGameView.setCanSelect(false);
+                    }else {
+                        mGameView.setCanSelect(true);
+                    }
+                }else {
+                    if (step % 2 ==0) {
+                        mGameView.setCanSelect(true);
+                    }else {
+                        mGameView.setCanSelect(false);
+                    }
+                }
+
+            }
         }
     }
 
@@ -219,11 +242,11 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case R.id.btn_findgame:
                     if (mIsFinding) {
-                        mBtnFindGame.setText("取消匹配");
+                        mBtnFindGame.setText("开始匹配");
                         mClient.cancelFind();
                         mIsFinding = false;
                     }else {
-                        mBtnFindGame.setText("开始匹配");
+                        mBtnFindGame.setText("取消匹配");
                         mClient.findGame();
                         mIsFinding = true;
                     }
@@ -233,6 +256,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public class MyGameViewListener implements GameView.GameViewListener {
+
+        @Override
+        public void walk(Walk walk) {
+            mClient.walk(walk);
+        }
+
+        @Override
+        public void onSelect(int x, int y) {
+            mClient.select(x, y);
+        }
 
     }
 

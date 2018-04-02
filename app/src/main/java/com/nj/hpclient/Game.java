@@ -199,10 +199,18 @@ public class Game {
         user2 = User.fromString(users[1]);
     }
 
+    public User getUser1() {
+        return user1;
+    }
+
+    public User getUser2() {
+        return user2;
+    }
+
     public void setData(String content) throws Exception {
         String[] tag = content.split(";");
         this.step = Integer.parseInt(tag[0]);
         this.walk = Walk.fromString(tag[1]);
-        this.map = GameUtil.mapFromString(tag[3]);
+        this.map = GameUtil.mapFromString(tag[2]);
     }
 }

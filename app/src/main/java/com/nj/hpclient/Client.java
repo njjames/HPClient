@@ -26,6 +26,7 @@ public class Client implements Runnable {
     private static final int ON_LOGIN_FAILED = 7;
     private static final int ON_SIGN_FAILED = 13;
     private static final int ON_START = 11;
+    private static final int ON_UPDATE = 12;
 
     private String ip;
     private int port;
@@ -63,6 +64,8 @@ public class Client implements Runnable {
                 case ON_START:
                     mClientListener.onStart();
                     break;
+                case ON_UPDATE:
+                    mClientListener.onUpdate();
             }
         }
     };
@@ -150,6 +153,7 @@ public class Client implements Runnable {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        mHandler.sendEmptyMessage(ON_UPDATE);
     }
 
     /**
@@ -217,6 +221,14 @@ public class Client implements Runnable {
         isConnect = false;
     }
 
+    public void walk(Walk walk) {
+        sendLine("walk:" + walk.toString());
+    }
+
+    public void select(int x, int y) {
+        sendLine("select:" + x + "," + y);
+    }
+
     public User getUser() {
         return mUser;
     }
@@ -235,6 +247,18 @@ public class Client implements Runnable {
             e.printStackTrace();
         }
     }
+
+    /**
+     * 判断是不是黑方，如果是则先走
+     * @return
+     */
+    public boolean isBlack() {
+        if (mUser.equals(mGame.getUser1())) {
+            return true;
+        }
+        return false;
+    }
+
 
     public interface ClientListener {
         //与服务器连接成功后的回调方法
@@ -257,5 +281,8 @@ public class Client implements Runnable {
 
         //匹配成功后的回调，用来开始游戏
         public void onStart();
+
+        //接收到服务器之后的回调，设置那个玩家可以操作棋盘
+        public void onUpdate();
     }
 }
