@@ -38,8 +38,8 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
     private float mDxOneBoard;
     private Point select;
     private Point mDownPoint;
-    //判断是那一边的，初始值是0，第一次点击翻开的是哪一方就是哪一方
-    private int witchSide = 0;
+//    //判断是那一边的，初始值是0，第一次点击翻开的是哪一方就是哪一方
+//    private int witchSide = 0;
 
     public GameView(Context context) {
         this(context, null);
@@ -372,8 +372,13 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
         if (canSelect) {
             if (select == null) {
                 //如果是第一次点击，就把第一次点击的牌属于哪一方设置给此值
-                if (witchSide == 0) {
-                    witchSide = Math.abs(mClient.mGame.getMap()[y - 1][x - 1]) / 100;
+                if (mClient.mGame.getUser1().whichSide == 0) {
+                    mClient.mGame.getUser1().whichSide = Math.abs(mClient.mGame.getMap()[y - 1][x - 1]) / 100;
+                    if (mClient.mGame.getUser1().whichSide == 1) {
+                        mClient.mGame.getUser2().whichSide = 2;
+                    }else {
+                        mClient.mGame.getUser2().whichSide = 1;
+                    }
                 }
                 //如果点击的是没有翻开的牌，则调用翻牌的回调
                 if (mClient.mGame.getMap()[y-1][x-1] < 0) {
@@ -381,7 +386,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
                     mGameViewListener.onSelect(y - 1, x - 1);
                 }else {
                     //如果点击的棋子和第一次点击的一致，说明是自己的棋子，就可以点击
-                    if (witchSide == mClient.mGame.getMap()[y - 1][x - 1] / 100) {
+                    if (mClient.mGame.getUser1().whichSide == mClient.mGame.getMap()[y - 1][x - 1] / 100) {
                         //这个不用相反，是因为这个用来在横纵坐标上显示的
                         select = new Point(x, y);
                     }
