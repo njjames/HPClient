@@ -122,4 +122,24 @@ public class User {
         return user;
     }
 
+    //平局
+    public void draw() {
+        drCount++;
+    }
+
+    /**
+     * 胜利
+     */
+    public void win() {
+        viCount++;
+        score += 2;
+    }
+
+    /**
+     * 失败
+     */
+    public void defeat() {
+        deCount++;
+        score -= 2;
+    }
 }

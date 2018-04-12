@@ -27,6 +27,8 @@ public class Client implements Runnable {
     private static final int ON_SIGN_FAILED = 13;
     private static final int ON_START = 11;
     private static final int ON_UPDATE = 12;
+    private static final int ON_GAMEOVER = 6;
+    private static final int ON_ASKPEACE = 1;
 
     private String ip;
     private int port;
@@ -66,6 +68,15 @@ public class Client implements Runnable {
                     break;
                 case ON_UPDATE:
                     mClientListener.onUpdate();
+                    break;
+                case ON_GAMEOVER:
+                    String content = (String) msg.obj;
+                    String[] split = content.split(";");
+                    mClientListener.onGameOver(Integer.parseInt(split[0]), split[1]);
+                    break;
+                case ON_ASKPEACE:
+                    mClientListener.onAskPeace();
+                    break;
             }
         }
     };
@@ -121,11 +132,43 @@ public class Client implements Runnable {
                     case "game":
                         receiveGameData(content);
                         break;
+                    case "gameover":
+                        receiveGameOver(content);
+                        break;
+                    case "othersideback":
+                        otherSide(content);
+                        break;
+                    case "askPeace":
+                        receiveAskPeace();
+                        break;
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void receiveAskPeace() {
+        mHandler.sendEmptyMessage(ON_ASKPEACE);
+    }
+
+    /**
+     * 从服务器获取对方属于哪一边
+     * @param content
+     */
+    private void otherSide(String content) {
+        mUser.whichSide = Integer.parseInt(content);
+    }
+
+    /**
+     * 接收到服务器结束游戏的信息
+     * @param content
+     */
+    private void receiveGameOver(String content) {
+        Message msg = Message.obtain();
+        msg.obj = content;
+        msg.what = ON_GAMEOVER;
+        mHandler.sendMessage(msg);
     }
 
     /**
@@ -229,6 +272,10 @@ public class Client implements Runnable {
         sendLine("select:" + x + "," + y);
     }
 
+    public void otherWhichSide(int whichSide) {
+        sendLine("otherside:" + whichSide);
+    }
+
     public User getUser() {
         return mUser;
     }
@@ -259,6 +306,18 @@ public class Client implements Runnable {
         return false;
     }
 
+    public void askPeace() {
+        sendLine("askpeace");
+    }
+
+    public void giveup() {
+        sendLine("giveup");
+    }
+
+    public void agressPeace() {
+        sendLine("agreepeace");
+    }
+
 
     public interface ClientListener {
         //与服务器连接成功后的回调方法
@@ -284,5 +343,11 @@ public class Client implements Runnable {
 
         //接收到服务器之后的回调，设置那个玩家可以操作棋盘
         public void onUpdate();
+
+        //接收到服务器发来的结束游戏的信息之后的回调
+        public void onGameOver(int n, String reason);
+
+        //收到请求和棋的信息后的回调
+        public void onAskPeace();
     }
 }

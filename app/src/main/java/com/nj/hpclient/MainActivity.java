@@ -1,11 +1,15 @@
 package com.nj.hpclient;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -58,6 +62,10 @@ public class MainActivity extends AppCompatActivity {
     private int headPic = 1;
     private boolean mIsFinding = false;
     private GameView mGameView;
+    private Dialog mMenuDialog;
+    private Button mBtnAskPeace;
+    private Button mBtnGiveUp;
+    private AlertDialog mAskPeaceDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -160,6 +168,64 @@ public class MainActivity extends AppCompatActivity {
 
             }
         }
+
+        @Override
+        public void onGameOver(int n, String reason) {
+            if (n == 0) {
+                Toast.makeText(MainActivity.this, "和棋" + reason, Toast.LENGTH_SHORT).show();
+                mLocalUser.draw();
+            }else if(n == 1) {
+                if (mClient.mGame.getUser1().equals(mLocalUser)) {
+                    Toast.makeText(MainActivity.this, "恭喜你赢了！" + reason, Toast.LENGTH_SHORT).show();
+                    mLocalUser.win();
+                }else {
+                    Toast.makeText(MainActivity.this, "很遗憾您输了！" + reason, Toast.LENGTH_SHORT).show();
+                    mLocalUser.defeat();
+                }
+            }else if(n == 2) {
+                if (mClient.mGame.getUser2().equals(mLocalUser)) {
+                    Toast.makeText(MainActivity.this, "恭喜你赢了！" + reason, Toast.LENGTH_SHORT).show();
+                    mLocalUser.win();
+                }else {
+                    Toast.makeText(MainActivity.this, "很遗憾您输了！" + reason, Toast.LENGTH_SHORT).show();
+                    mLocalUser.defeat();
+                }
+            }
+            mClient.getUser().whichSide = 0;
+            saveUserToLocal(mLocalUser);
+            menuView();
+        }
+
+        @Override
+        public void onAskPeace() {
+            askPeaceDialog();
+        }
+    }
+
+    /**
+     * 请求投降的对话框
+     */
+    private void askPeaceDialog() {
+        if (mAskPeaceDialog == null) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            mAskPeaceDialog = builder.setMessage("对方请求和棋，是否同意？")
+                    .setTitle("提示")
+                    .setPositiveButton("同意", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            mClient.agressPeace();
+                            mAskPeaceDialog.dismiss();
+                        }
+                    })
+                    .setNegativeButton("拒绝", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            mAskPeaceDialog.dismiss();
+                        }
+                    })
+                    .create();
+        }
+        mAskPeaceDialog.show();
     }
 
     private class MyClickListener implements View.OnClickListener {
@@ -267,6 +333,44 @@ public class MainActivity extends AppCompatActivity {
             mClient.select(x, y);
         }
 
+        @Override
+        public void onOtherWhichSide(int whichSide) {
+            mClient.otherWhichSide(whichSide);
+        }
+
+        @Override
+        public void onClickBtnMenu() {
+            menuDialog();
+        }
+
+    }
+
+    /**
+     * 显示菜单对话框
+     */
+    private void menuDialog() {
+        if (mMenuDialog == null) {
+            mMenuDialog = new Dialog(this, R.style.Theme_AppCompat_DialogWhenLarge);
+            View view = LayoutInflater.from(this).inflate(R.layout.dialog_menu, null);
+            mMenuDialog.setContentView(view);
+            mBtnAskPeace = view.findViewById(R.id.btn_askPeace);
+            mBtnGiveUp = view.findViewById(R.id.btn_giveup);
+            mBtnAskPeace.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    mClient.askPeace();
+                    mMenuDialog.dismiss();
+                }
+            });
+            mBtnGiveUp.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    mClient.giveup();
+                    mMenuDialog.dismiss();
+                }
+            });
+        }
+        mMenuDialog.show();
     }
 
     /**

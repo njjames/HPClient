@@ -7,6 +7,8 @@ import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.Path;
 import android.graphics.Point;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -38,7 +40,11 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
     private float mDxOneBoard;
     private Point select;
     private Point mDownPoint;
-//    //判断是那一边的，初始值是0，第一次点击翻开的是哪一方就是哪一方
+    private String mMyHead;
+    private String mOtherHead;
+    private RectF mMenuBtnRect;
+    private boolean mMenuBtnDown;
+    //    //判断是那一边的，初始值是0，第一次点击翻开的是哪一方就是哪一方
 //    private int witchSide = 0;
 
     public GameView(Context context) {
@@ -130,6 +136,138 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
         drawBoard(canvas, paint);
         drawChess(canvas, paint);
         drawSelect(canvas, paint);
+        drawHead(canvas, paint);
+        drawBtnMenu(canvas, paint);
+    }
+
+    /**
+     * 画菜单按钮
+     * @param canvas
+     * @param paint
+     */
+    private void drawBtnMenu(Canvas canvas, Paint paint) {
+        if (mMenuBtnRect == null) {
+            mMenuBtnRect = new RectF(mDxBoard,
+                    mWidth + 2 * mDxBoard + 80 + Img.getHead(Integer.parseInt(mMyHead)).getHeight() + 20,
+                    mWidth - mDxBoard,
+                    mWidth + 2 * mDxBoard + 80 + Img.getHead(Integer.parseInt(mMyHead)).getHeight() + 120);
+        }
+        if (mMenuBtnDown) {
+            paint.setColor(0xaa6699ff);
+        } else {
+            paint.setColor(0xff6699ff);
+        }
+        canvas.drawRoundRect(mMenuBtnRect, 10, 10, paint);
+        paint.setColor(0xffffffff);
+        paint.setTextSize(50);
+        drawCenter(canvas, "菜单", mMenuBtnRect.centerX()-50, mMenuBtnRect.centerY(),
+                paint);
+    }
+
+    private void drawCenter(Canvas canvas, String str, float x, float y, Paint paint) {
+        Paint.FontMetrics fontMetrics = paint.getFontMetrics();
+        canvas.drawText(str, x, y - (fontMetrics.ascent + fontMetrics.descent) / 2, paint);
+    }
+
+    /**
+     * 画玩家的头像
+     * @param canvas
+     * @param paint
+     */
+    private void drawHead(Canvas canvas, Paint paint) {
+        paint.setStrokeWidth(5);
+        paint.setStyle(Paint.Style.FILL);
+        String otherName = mClient.mGame.getOtherUser(mClient.getUser()).getName();
+        mMyHead = mClient.getUser().getHead();
+        mOtherHead = mClient.mGame.getOtherUser(mClient.getUser()).getHead();
+        Rect rect = new Rect();
+        paint.getTextBounds(otherName, 0, otherName.length(), rect);
+        if (mClient.getUser().whichSide == 0) {
+            paint.setColor(Color.BLACK);
+            if (canSelect) {
+                drawLeftArrow(canvas, rect);
+                setPaintText(paint, true);
+                canvas.drawText(mClient.getUser().getName(), mDxBoard, mWidth + 2 * mDxBoard, paint);
+                setPaintText(paint, false);
+                canvas.drawText(otherName, mWidth - mDxBoard - rect.width(), mWidth + 2 * mDxBoard, paint);
+            }else {
+                drawRightArrow(canvas, rect);
+                setPaintText(paint, false);
+                canvas.drawText(mClient.getUser().getName(), mDxBoard, mWidth + 2 * mDxBoard, paint);
+                setPaintText(paint, true);
+                canvas.drawText(otherName, mWidth - mDxBoard - rect.width(), mWidth + 2 * mDxBoard, paint);
+            }
+        }else if(mClient.getUser().whichSide == 1) {
+            if (canSelect) {
+                drawLeftArrow(canvas, rect);
+                setPaintText(paint, true);
+                paint.setColor(Color.parseColor("#0000ff"));
+                canvas.drawText(mClient.getUser().getName(), mDxBoard, mWidth + 2 * mDxBoard, paint);
+                setPaintText(paint, false);
+                paint.setColor(Color.parseColor("#ff0000"));
+                canvas.drawText(otherName, mWidth - mDxBoard - rect.width(), mWidth + 2 * mDxBoard, paint);
+            }else {
+                drawRightArrow(canvas, rect);
+                setPaintText(paint, false);
+                paint.setColor(Color.parseColor("#0000ff"));
+                canvas.drawText(mClient.getUser().getName(), mDxBoard, mWidth + 2 * mDxBoard, paint);
+                setPaintText(paint, true);
+                paint.setColor(Color.parseColor("#ff0000"));
+                canvas.drawText(otherName, mWidth - mDxBoard - rect.width(), mWidth + 2 * mDxBoard, paint);
+            }
+        }else if(mClient.getUser().whichSide == 2) {
+            if (canSelect) {
+                drawLeftArrow(canvas, rect);
+                setPaintText(paint, true);
+                paint.setColor(Color.parseColor("#ff0000"));
+                canvas.drawText(mClient.getUser().getName(), mDxBoard, mWidth + 2 * mDxBoard, paint);
+                setPaintText(paint, false);
+                paint.setColor(Color.parseColor("#0000ff"));
+                canvas.drawText(otherName, mWidth - mDxBoard - rect.width(), mWidth + 2 * mDxBoard, paint);
+            }else {
+                drawRightArrow(canvas, rect);
+                setPaintText(paint, false);
+                paint.setColor(Color.parseColor("#ff0000"));
+                canvas.drawText(mClient.getUser().getName(), mDxBoard, mWidth + 2 * mDxBoard, paint);
+                setPaintText(paint, true);
+                paint.setColor(Color.parseColor("#0000ff"));
+                canvas.drawText(otherName, mWidth - mDxBoard - rect.width(), mWidth + 2 * mDxBoard, paint);
+            }
+        }
+        canvas.drawBitmap(Img.getHead(Integer.parseInt(mMyHead)), mDxBoard, mWidth + 2 * mDxBoard + 20, paint);
+        canvas.drawBitmap(Img.getHead(Integer.parseInt(mOtherHead)), mWidth - mDxBoard - Img.getHead(Integer.parseInt(mOtherHead)).getWidth(), mWidth + 2 * mDxBoard + 20, paint);
+    }
+
+    private void drawLeftArrow(Canvas canvas, Rect rect) {
+        Paint paint = new Paint();
+        paint.setColor(Color.BLACK);
+        Path path = new Path();
+        path.moveTo(mWidth / 2, mWidth + 2 * mDxBoard - rect.height());
+        path.lineTo(mWidth / 2, mWidth + 2 * mDxBoard);
+        path.lineTo(mWidth / 2 - rect.height(), mWidth + 2 * mDxBoard - rect.height() / 2);
+        path.close();
+        canvas.drawPath(path, paint);
+    }
+
+    private void drawRightArrow(Canvas canvas, Rect rect) {
+        Paint paint = new Paint();
+        paint.setColor(Color.BLACK);
+        Path path = new Path();
+        path.moveTo(mWidth / 2, mWidth + 2 * mDxBoard - rect.height());
+        path.lineTo(mWidth / 2, mWidth + 2 * mDxBoard);
+        path.lineTo(mWidth / 2 + rect.height(), mWidth + 2 * mDxBoard - rect.height() / 2);
+        path.close();
+        canvas.drawPath(path, paint);
+    }
+
+    private void setPaintText(Paint paint, boolean isLarge) {
+        if (isLarge) {
+            paint.setTextSize(80);
+            paint.setStrokeWidth(10);
+        } else {
+            paint.setTextSize(60);
+            paint.setStrokeWidth(5);
+        }
     }
 
     /**
@@ -347,8 +485,16 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
             case MotionEvent.ACTION_DOWN:
                 //按下时记录按下点
                 mDownPoint = new Point(x, y);
+                if (mMenuBtnRect.contains(x, y)) {
+                    mMenuBtnDown = true;
+                }
                 break;
             case MotionEvent.ACTION_UP:
+                //抬起时如果还在
+                if (mMenuBtnRect.contains(x, y) && mMenuBtnDown) {
+                    mGameViewListener.onClickBtnMenu();
+                }
+                mMenuBtnDown = false;
                 //如果抬起时，还在一个棋子的范围，就执行onClick方法
                 Point point = locateXYToMap(mDownPoint.x, mDownPoint.y);
                 if (point != null) {
@@ -372,12 +518,13 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
         if (canSelect) {
             if (select == null) {
                 //如果是第一次点击，就把第一次点击的牌属于哪一方设置给此值
-                if (mClient.mGame.getUser1().whichSide == 0) {
-                    mClient.mGame.getUser1().whichSide = Math.abs(mClient.mGame.getMap()[y - 1][x - 1]) / 100;
-                    if (mClient.mGame.getUser1().whichSide == 1) {
-                        mClient.mGame.getUser2().whichSide = 2;
+                if (mClient.getUser().whichSide == 0) {
+                    if (Math.abs(mClient.mGame.getMap()[y - 1][x - 1]) / 100 == 1) {
+                        mClient.getUser().whichSide = 1;
+                        mGameViewListener.onOtherWhichSide(2);
                     }else {
-                        mClient.mGame.getUser2().whichSide = 1;
+                        mClient.getUser().whichSide = 2;
+                        mGameViewListener.onOtherWhichSide(1);
                     }
                 }
                 //如果点击的是没有翻开的牌，则调用翻牌的回调
@@ -386,14 +533,14 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
                     mGameViewListener.onSelect(y - 1, x - 1);
                 }else {
                     //如果点击的棋子和第一次点击的一致，说明是自己的棋子，就可以点击
-                    if (mClient.mGame.getUser1().whichSide == mClient.mGame.getMap()[y - 1][x - 1] / 100) {
+                    if (mClient.getUser().whichSide == mClient.mGame.getMap()[y - 1][x - 1] / 100) {
                         //这个不用相反，是因为这个用来在横纵坐标上显示的
                         select = new Point(x, y);
                     }
                 }
             }else {
                 //如果这次点击的是自己这一边的棋牌，则把选择放到这个牌上，否则按照走棋的逻辑走
-                if(mClient.mGame.getMap()[y-1][x-1] / 100 == mClient.mGame.getMap()[select.y-1][select.x-1] / 100) {
+                if(mClient.mGame.getMap()[y-1][x-1] / 100 == mClient.getUser().whichSide) {//只要再次点击的是自己这边的就把选择的牌换为当前选择牌
                     select.x = x;
                     select.y = y;
                 }else {
@@ -411,5 +558,10 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
         public void walk(Walk walk);
 
         public void onSelect(int x, int y);
+
+        //通知对方属于那一边,第一个参数是自己，第二个参数是对方属于哪一边
+        public void onOtherWhichSide(int whichSide);
+
+        public void onClickBtnMenu();
     }
 }

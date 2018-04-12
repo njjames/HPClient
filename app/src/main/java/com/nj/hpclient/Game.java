@@ -199,6 +199,19 @@ public class Game {
         user2 = User.fromString(users[1]);
     }
 
+    /**
+     * 根据自身获取对方玩家
+     * @param self
+     * @return
+     */
+    public User getOtherUser(User self) {
+        if (self.equals(user1)) {
+            return user2;
+        }else {
+            return user1;
+        }
+    }
+
     public User getUser1() {
         return user1;
     }
