@@ -3,19 +3,31 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center">
+    android:gravity="center"
+    android:padding="10dp">
 
     <Button
         android:id="@+id/btn_askPeace"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="和棋"/>
+        android:text="和棋"
+        android:padding="5dp"
+        android:layout_margin="5dp"/>
 
     <Button
         android:id="@+id/btn_giveup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="投降"/>
+        android:text="投降"
+        android:padding="5dp"
+        android:layout_margin="5dp"/>
 
+    <Button
+        android:id="@+id/btn_help"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="帮助"
+        android:padding="5dp"
+        android:layout_margin="5dp"/>
 
 </LinearLayout>

@@ -1,14 +1,17 @@
 package com.nj.hpclient;
 
 import android.annotation.SuppressLint;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.RandomAccessFile;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
@@ -29,6 +32,9 @@ public class Client implements Runnable {
     private static final int ON_UPDATE = 12;
     private static final int ON_GAMEOVER = 6;
     private static final int ON_ASKPEACE = 1;
+    private static final int ON_NEWVERSION = 14;
+    private static final int ON_INSTALL = 15;
+    private static final int ON_DOWNLOADPROGRESS = 16;
 
     private String ip;
     private int port;
@@ -37,6 +43,7 @@ public class Client implements Runnable {
     private boolean isConnect;
     private Socket mSocket;
     public Game mGame;
+    private boolean mDowloading;
 
     private User mUser;
 
@@ -76,6 +83,18 @@ public class Client implements Runnable {
                     break;
                 case ON_ASKPEACE:
                     mClientListener.onAskPeace();
+                    break;
+                case ON_NEWVERSION:
+                    String version = (String) msg.obj;
+                    String[] tag = version.split(";");
+                    mClientListener.onNewVersion(Integer.parseInt(tag[0]), tag[1], Integer.parseInt(tag[2]));
+                    break;
+                case ON_INSTALL:
+                    mClientListener.onInstall();
+                    break;
+                case ON_DOWNLOADPROGRESS:
+                    int progress = (int) msg.obj;
+                    mClientListener.onProgress(progress);
                     break;
             }
         }
@@ -141,11 +160,67 @@ public class Client implements Runnable {
                     case "askPeace":
                         receiveAskPeace();
                         break;
+                    case "newversion":
+                        receiveNewVersion(content);
+                        break;
+                    case "newApk":
+                        mDowloading = true;
+                        receiveNewAPK();
+                        break;
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void receiveNewAPK() {
+        while(mDowloading) {
+            RandomAccessFile raf = null;
+            try {
+                if(Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+                    //获取sd卡的路径，也就是设置下载存储的路径
+                    String path = Environment.getExternalStorageDirectory().getAbsolutePath()
+                            + File.separator + "HPClent.apk";
+                    raf = new RandomAccessFile(path, "rwd");
+                    InputStream is = mSocket.getInputStream();
+                    int total = 0;
+                    int len = -1;
+                    byte[] buf = new byte[2048];
+                    while((len = is.read(buf)) != -1) {
+                        raf.write(buf, 0, len);
+                        total += len;
+                        Message msg = Message.obtain();
+                        msg.obj = total;
+                        msg.what = ON_DOWNLOADPROGRESS;
+                        mHandler.sendMessage(msg);
+                    }
+                    mDowloading = false;
+                    mHandler.sendEmptyMessage(ON_INSTALL);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (raf != null) {
+                    try {
+                        raf.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 从服务器获取最新的版本号
+     * @param content
+     */
+    private void receiveNewVersion(String content) {
+        Message msg = Message.obtain();
+        msg.obj = content;
+        msg.what = ON_NEWVERSION;
+        mHandler.sendMessage(msg);
     }
 
     private void receiveAskPeace() {
@@ -318,6 +393,14 @@ public class Client implements Runnable {
         sendLine("agreepeace");
     }
 
+    public void checkVersion() {
+        sendLine("version");
+    }
+
+    public void downLoadNewVersion() {
+        sendLine("download");
+    }
+
 
     public interface ClientListener {
         //与服务器连接成功后的回调方法
@@ -349,5 +432,14 @@ public class Client implements Runnable {
 
         //收到请求和棋的信息后的回调
         public void onAskPeace();
+
+        //获取到最新版本信息后的回调
+        public void onNewVersion(int versionCode, String versionName, int size);
+
+        //下载在完成后准备安装的回调
+        public void onInstall();
+
+        //下载数据时的回调
+        public void onProgress(int progress);
     }
 }

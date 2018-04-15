@@ -1,11 +1,23 @@
 package com.nj.hpclient;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -16,6 +28,9 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.io.File;
+import java.util.Formatter;
 
 public class MainActivity extends AppCompatActivity {
     public static final int GAME_VIEW = 1;
@@ -66,13 +81,32 @@ public class MainActivity extends AppCompatActivity {
     private Button mBtnAskPeace;
     private Button mBtnGiveUp;
     private AlertDialog mAskPeaceDialog;
+    private Button mBtnHelp;
+    private AlertDialog mHelpDialog;
+    private TextView mTvVersion;
+    private PackageInfo mPackageInfo;
+    private int mVersionCode = 0;
+    private AlertDialog mUpdateDialog;
+    private ProgressDialog mDownloadProgressDialog;
+    private int fileSize;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         //初始化图片，否则图片显示不出来
         Img.init(this);
         setContentView(R.layout.layout_start);
+        mTvVersion = findViewById(R.id.tv_version);
+        try {
+            mPackageInfo = getApplicationContext().getPackageManager().getPackageInfo(getPackageName(), 0);
+            mVersionCode = mPackageInfo.versionCode;
+            String versionName = mPackageInfo.versionName;
+            mTvVersion.setText("版本：" + versionName);
+        } catch (PackageManager.NameNotFoundException e) {
+            Toast.makeText(MainActivity.this, "获取版本号失败，请下载最新程序", Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
+        }
         mClientListener = new MyClientListener();
         mClickListener = new MyClickListener();
         mGameViewListener = new MyGameViewListener();
@@ -80,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 try {
-                    Thread.sleep(3000);
+                    Thread.sleep(2000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -92,15 +126,7 @@ public class MainActivity extends AppCompatActivity {
     private class MyClientListener implements Client.ClientListener{
         @Override
         public void onConnect() {
-            mLocalUser = getLocalUser();
-            //获取到则直接登录，否则显示登录界面
-            if (mLocalUser != null) {
-                //获取到之后就直接把这个用户设置给客户端
-                mClient.setUser(mLocalUser);
-                mClient.login();
-            }else {
-                loginView();
-            }
+            mClient.checkVersion();
         }
 
         @Override
@@ -200,6 +226,132 @@ public class MainActivity extends AppCompatActivity {
         public void onAskPeace() {
             askPeaceDialog();
         }
+
+        @Override
+        public void onNewVersion(int versionCode, String versionName, int size) {
+            if (versionCode > mVersionCode) {
+                showUpdateDialog(versionName, size);
+            }else {
+                login();
+            }
+        }
+
+        @Override
+        public void onInstall() {
+            if (mDownloadProgressDialog != null) {
+                mDownloadProgressDialog.dismiss();
+            }
+            installApkFile();
+        }
+
+        @Override
+        public void onProgress(int progress) {
+            if (mDownloadProgressDialog != null) {
+                mDownloadProgressDialog.setProgress((int) (progress * 1.0f / fileSize * 100));
+            }
+        }
+    }
+
+    private void installApkFile() {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath()
+                + File.separator + "HPClent.apk");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Uri contentUri = FileProvider.getUriForFile(this, "com.nj.hpclient.fileprovider", file);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);//有的文章没有加这个，必须加
+            intent.setDataAndType(contentUri, "application/vnd.android.package-archive");
+        } else {
+            intent.setDataAndType(Uri.fromFile(file), "application/vnd.android.package-archive");
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        }
+        //开启意图
+        //如果弹出安装界面后，点击取消，用startActivity回显示上一个acticity也就是欢迎界面，所以需要使用forresult
+        startActivityForResult(intent, 0);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        login();
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    /**
+     * 进行登录操作，如果登录失败显示登录界面
+     */
+    private void login() {
+        mLocalUser = getLocalUser();
+        //获取到则直接登录，否则显示登录界面
+        if (mLocalUser != null) {
+            //获取到之后就直接把这个用户设置给客户端
+            mClient.setUser(mLocalUser);
+            mClient.login();
+        }else {
+            loginView();
+        }
+    }
+
+    /**
+     * 显示提示升级的对话框
+     * @param versionName
+     * @param size
+     */
+    private void showUpdateDialog(String versionName, int size) {
+        if (mUpdateDialog == null) {
+            this.fileSize = size;
+            String fileSizeStr = android.text.format.Formatter.formatFileSize(this, size);
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            mUpdateDialog = builder.setMessage("发现新的版本" + versionName + "，建议下载升级！\n安装包大小：" + fileSizeStr)
+                    .setTitle("升级")
+                    .setPositiveButton("升级", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                                ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                            }else {
+                                download();
+                            }
+                        }
+                    })
+                    .setNegativeButton("拒绝", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            mUpdateDialog.dismiss();
+                            login();
+                        }
+                    }).create();
+        }
+        mUpdateDialog.show();
+    }
+
+    private void download() {
+        mClient.downLoadNewVersion();
+        mUpdateDialog.dismiss();
+        showDownlogProgressDialog();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case 1:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    download();
+                }else {
+                    Toast.makeText(MainActivity.this, "权限被拒绝", Toast.LENGTH_SHORT).show();
+                }
+                break;
+        }
+    }
+
+    private void showDownlogProgressDialog() {
+        if (mDownloadProgressDialog == null) {
+            mDownloadProgressDialog = new ProgressDialog(this);
+            mDownloadProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            mDownloadProgressDialog.setCancelable(false);
+            mDownloadProgressDialog.setCanceledOnTouchOutside(false);
+            mDownloadProgressDialog.setMax(100);
+            mDownloadProgressDialog.setTitle("正在下载");
+        }
+        mDownloadProgressDialog.show();
     }
 
     /**
@@ -350,11 +502,12 @@ public class MainActivity extends AppCompatActivity {
      */
     private void menuDialog() {
         if (mMenuDialog == null) {
-            mMenuDialog = new Dialog(this, R.style.Theme_AppCompat_DialogWhenLarge);
+            mMenuDialog = new Dialog(this, R.style.Theme_AppCompat_Dialog);
             View view = LayoutInflater.from(this).inflate(R.layout.dialog_menu, null);
             mMenuDialog.setContentView(view);
             mBtnAskPeace = view.findViewById(R.id.btn_askPeace);
             mBtnGiveUp = view.findViewById(R.id.btn_giveup);
+            mBtnHelp = view.findViewById(R.id.btn_help);
             mBtnAskPeace.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -369,8 +522,34 @@ public class MainActivity extends AppCompatActivity {
                     mMenuDialog.dismiss();
                 }
             });
+            mBtnHelp.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    showHelpDialog();
+                    mMenuDialog.dismiss();
+                }
+            });
         }
         mMenuDialog.show();
+    }
+
+    /**
+     * 显示帮助的对话框
+     */
+    private void showHelpDialog() {
+        if (mHelpDialog == null) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            mHelpDialog = builder.setMessage(R.string.help)
+                    .setTitle("帮助")
+                    .setPositiveButton("好的", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            mHelpDialog.dismiss();
+                        }
+                    })
+                    .create();
+        }
+        mHelpDialog.show();
     }
 
     /**

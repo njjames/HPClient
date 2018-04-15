@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#f00">
+    android:background="#f22">
 
     <TextView
         android:id="@+id/tv_title"
@@ -11,15 +11,28 @@
         android:text="花片游戏"
         android:textSize="40sp"
         android:textColor="#000"
-        android:layout_centerInParent="true"
-        android:layout_marginTop="100dp"/>
+        android:layout_marginTop="100dp"
+        android:layout_centerHorizontal="true"/>
 
     <TextView
+        android:id="@+id/tv_load"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="玩命加载中..."
-        android:layout_below="@+id/tv_title"
+        android:layout_below="@id/tv_title"
+        android:layout_marginTop="100dp"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="5dp"/>
+        android:textSize="18sp"/>
+
+    <TextView
+        android:id="@+id/tv_version"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="版本："
+        android:layout_marginTop="50dp"
+        android:layout_below="@id/tv_load"
+        android:layout_centerHorizontal="true"
+        android:textColor="#ccc"
+        android:textSize="14sp"/>
 
 </RelativeLayout>
