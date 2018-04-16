@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -30,6 +31,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Formatter;
 
 public class MainActivity extends AppCompatActivity {
@@ -89,6 +91,8 @@ public class MainActivity extends AppCompatActivity {
     private AlertDialog mUpdateDialog;
     private ProgressDialog mDownloadProgressDialog;
     private int fileSize;
+    private Button mBtnMusic;
+    private boolean mIsMusicOn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,6 +100,9 @@ public class MainActivity extends AppCompatActivity {
 
         //初始化图片，否则图片显示不出来
         Img.init(this);
+        //初始化音乐
+        Mp3.init(this);
+//        Mp3.bgm.start();
         setContentView(R.layout.layout_start);
         mTvVersion = findViewById(R.id.tv_version);
         try {
@@ -204,17 +211,21 @@ public class MainActivity extends AppCompatActivity {
                 if (mClient.mGame.getUser1().equals(mLocalUser)) {
                     Toast.makeText(MainActivity.this, "恭喜你赢了！" + reason, Toast.LENGTH_SHORT).show();
                     mLocalUser.win();
+                    Mp3.win.start();
                 }else {
                     Toast.makeText(MainActivity.this, "很遗憾您输了！" + reason, Toast.LENGTH_SHORT).show();
                     mLocalUser.defeat();
+                    Mp3.lose.start();
                 }
             }else if(n == 2) {
                 if (mClient.mGame.getUser2().equals(mLocalUser)) {
                     Toast.makeText(MainActivity.this, "恭喜你赢了！" + reason, Toast.LENGTH_SHORT).show();
                     mLocalUser.win();
+                    Mp3.win.start();
                 }else {
                     Toast.makeText(MainActivity.this, "很遗憾您输了！" + reason, Toast.LENGTH_SHORT).show();
                     mLocalUser.defeat();
+                    Mp3.lose.start();
                 }
             }
             mClient.getUser().whichSide = 0;
@@ -279,6 +290,12 @@ public class MainActivity extends AppCompatActivity {
      * 进行登录操作，如果登录失败显示登录界面
      */
     private void login() {
+        if (SPUtil.getBoolean(this, "music", true)) {
+            mIsMusicOn = true;
+            Mp3.bgm.start();
+        }else {
+            mIsMusicOn = false;
+        }
         mLocalUser = getLocalUser();
         //获取到则直接登录，否则显示登录界面
         if (mLocalUser != null) {
@@ -469,6 +486,26 @@ public class MainActivity extends AppCompatActivity {
                         mIsFinding = true;
                     }
                     break;
+                case R.id.btn_music:
+                    if (mIsMusicOn) {
+                        mBtnMusic.setBackgroundResource(R.drawable.music_off);
+                        mIsMusicOn = false;
+                        try {
+                            Mp3.bgm.stop();
+                            //在stop的时候prepare，不能再start之前prepare
+                            Mp3.bgm.prepare();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        SPUtil.putBoolean(MainActivity.this, "music", false);
+                    }else {
+                        mBtnMusic.setBackgroundResource(R.drawable.music_on);
+                        mIsMusicOn = true;
+                        Mp3.bgm.start();
+                        SPUtil.putBoolean(MainActivity.this, "music", true);
+                    }
+                    break;
+
             }
         }
     }
@@ -623,8 +660,10 @@ public class MainActivity extends AppCompatActivity {
             mTvDecount = findViewById(R.id.tv_decount);
             mTvDrcount = findViewById(R.id.tv_drcount);
             mIvHead = findViewById(R.id.iv_head);
+            mBtnMusic = findViewById(R.id.btn_music);
             mBtnLogout.setOnClickListener(mClickListener);
             mBtnFindGame.setOnClickListener(mClickListener);
+            mBtnMusic.setOnClickListener(mClickListener);
         }
         //如果当前显示的就是这个界面，直接加载数据
         int head = Integer.parseInt(mLocalUser.getHead());
@@ -634,6 +673,11 @@ public class MainActivity extends AppCompatActivity {
         mTvDecount.setText("负场：" + mLocalUser.getDeCount());
         mTvDrcount.setText("平场：" + mLocalUser.getDrCount());
         mIvHead.setImageBitmap(Img.getHead(head));
+        if (mIsMusicOn) {
+            mBtnMusic.setBackgroundResource(R.drawable.music_on);
+        }else {
+            mBtnMusic.setBackgroundResource(R.drawable.music_off);
+        }
     }
 
     /**
@@ -674,4 +718,28 @@ public class MainActivity extends AppCompatActivity {
         SPUtil.clear(this);
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mIsMusicOn) {
+            Mp3.bgm.pause();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mIsMusicOn) {
+            Mp3.bgm.start();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (Mp3.bgm.isPlaying()) {
+            Mp3.bgm.stop();
+        }
+        Mp3.bgm.release();
+    }
 }

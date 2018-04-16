@@ -50,4 +50,21 @@ public class SPUtil {
         editor.clear();
         editor.commit();
     }
+
+    public static void putBoolean(Context context, String key, boolean value) {
+        if(sp == null) {
+            sp = context.getSharedPreferences("userconfig", Context.MODE_PRIVATE);
+        }
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putBoolean(key, value);
+        editor.apply();
+    }
+
+    public static boolean getBoolean(Context context, String key, boolean defValue) {
+        if(sp == null) {
+            sp = context.getSharedPreferences("userconfig", Context.MODE_PRIVATE);
+        }
+        return sp.getBoolean(key, defValue);
+    }
+
 }

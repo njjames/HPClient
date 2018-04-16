@@ -10,7 +10,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="注销"
-        android:layout_gravity="right"/>
+        android:layout_gravity="right"
+        android:layout_marginTop="10dp"/>
 
     <ImageView
         android:id="@+id/iv_head"
@@ -70,5 +71,13 @@
         android:layout_gravity="center_horizontal"
         android:gravity="center"
         android:layout_marginTop="15dp"/>
+
+    <Button
+        android:id="@+id/btn_music"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/music_on"/>
 
 </LinearLayout>
