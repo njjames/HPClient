@@ -44,6 +44,9 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
     private String mOtherHead;
     private RectF mMenuBtnRect;
     private boolean mMenuBtnDown;
+    private int model;
+    private float mBoardHeight;
+    private float mBoardWidth;
     //    //判断是那一边的，初始值是0，第一次点击翻开的是哪一方就是哪一方
 //    private int witchSide = 0;
 
@@ -60,9 +63,10 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
         init();
     }
 
-    public GameView(Context context, Client client, GameViewListener gameViewListener) {
+    public GameView(Context context, Client client, int model, GameViewListener gameViewListener) {
         this(context);
         this.mClient = client;
+        this.model = model;
         this.mGameViewListener = gameViewListener;
         //必须设置这个，否则不出发点击事件
         this.setOnTouchListener(this);
@@ -79,17 +83,26 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
     private void initDrawData() {
         mWidth = getWidth();
         mHeight = getHeight();
-        //边框间距
-        mDxBoard = 30f;
-        //棋子之前的距离
-        mDxChess = 30f;
-        //棋牌的半径
-        mChessRadius = (getWidth() - 2 * mDxBoard - 3 * mDxChess) / 8;
-        //棋盘左上角的坐标
-        mBoardLeftX = 10 + mChessRadius;
-        mBoardLeftY = 10 + mChessRadius;
-        //棋盘每行之间的间距
-        mDxOneBoard = 2 * mChessRadius + mDxChess;
+        if (model == 1) {
+            //边框间距
+            mDxBoard = 30f;
+            //棋子之前的距离
+            mDxChess = 30f;
+            //棋牌的半径
+            mChessRadius = (getWidth() - 2 * mDxBoard - 3 * mDxChess) / 8;
+            //棋盘左上角的坐标
+            mBoardLeftX = 10 + mChessRadius;
+            mBoardLeftY = 10 + mChessRadius;
+            //棋盘每行之间的间距
+            mDxOneBoard = 2 * mChessRadius + mDxChess;
+        } else if(model == 2){
+            mDxBoard = 10f;
+            //棋盘每行之间的间距
+            mDxOneBoard = (mWidth - 2 * mDxBoard) / 7;
+            //棋盘总共占的高度
+            mBoardHeight = mDxOneBoard * 9 + 2 * mDxBoard;
+
+        }
     }
 
     @Override
@@ -417,26 +430,67 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
      */
     private void drawBoard(Canvas canvas, Paint paint) {
         Path path = new Path();
-        paint.setStrokeWidth(15);
         paint.setStyle(Paint.Style.STROKE);
         paint.setColor(Color.parseColor("#000000"));
-        path.reset();
-        path.moveTo(mDxBoard + mChessRadius, mDxBoard + mChessRadius);
-        path.lineTo(mWidth - mDxBoard - mChessRadius, mDxBoard + mChessRadius);
-        path.lineTo(mWidth - mDxBoard - mChessRadius, mWidth - mDxBoard - mChessRadius);
-        path.lineTo(mDxBoard + mChessRadius, mWidth - mDxBoard - mChessRadius);
-        path.close();
-        canvas.drawPath(path, paint);
-        path.reset();
-        path.moveTo(mDxBoard + 3 * mChessRadius + mDxChess, mDxBoard + mChessRadius);
-        canvas.drawLine(mDxBoard + 3 * mChessRadius + mDxChess, mDxBoard + mChessRadius,
-                mDxBoard + 3 * mChessRadius + mDxChess, mWidth - mDxBoard - mChessRadius, paint);
-        canvas.drawLine(mDxBoard + 5 * mChessRadius + 2 * mDxChess, mDxBoard + mChessRadius,
-                mDxBoard + 5 * mChessRadius + 2 * mDxChess, mWidth - mDxBoard - mChessRadius, paint);
-        canvas.drawLine(mDxBoard + mChessRadius, mDxBoard + 3 * mChessRadius + mDxChess,
-                mWidth - mDxBoard - mChessRadius, mDxBoard + 3 * mChessRadius + mDxChess, paint);
-        canvas.drawLine(mDxBoard + mChessRadius, mDxBoard + 5 * mChessRadius + 2 * mDxChess,
-                mWidth - mDxBoard - mChessRadius, mDxBoard + 5 * mChessRadius + 2 * mDxChess, paint);
+        if (model == 1) {
+            paint.setStrokeWidth(15);
+            path.reset();
+            path.moveTo(mDxBoard + mChessRadius, mDxBoard + mChessRadius);
+            path.lineTo(mWidth - mDxBoard - mChessRadius, mDxBoard + mChessRadius);
+            path.lineTo(mWidth - mDxBoard - mChessRadius, mWidth - mDxBoard - mChessRadius);
+            path.lineTo(mDxBoard + mChessRadius, mWidth - mDxBoard - mChessRadius);
+            path.close();
+            canvas.drawPath(path, paint);
+            path.reset();
+            path.moveTo(mDxBoard + 3 * mChessRadius + mDxChess, mDxBoard + mChessRadius);
+            canvas.drawLine(mDxBoard + 3 * mChessRadius + mDxChess, mDxBoard + mChessRadius,
+                    mDxBoard + 3 * mChessRadius + mDxChess, mWidth - mDxBoard - mChessRadius, paint);
+            canvas.drawLine(mDxBoard + 5 * mChessRadius + 2 * mDxChess, mDxBoard + mChessRadius,
+                    mDxBoard + 5 * mChessRadius + 2 * mDxChess, mWidth - mDxBoard - mChessRadius, paint);
+            canvas.drawLine(mDxBoard + mChessRadius, mDxBoard + 3 * mChessRadius + mDxChess,
+                    mWidth - mDxBoard - mChessRadius, mDxBoard + 3 * mChessRadius + mDxChess, paint);
+            canvas.drawLine(mDxBoard + mChessRadius, mDxBoard + 5 * mChessRadius + 2 * mDxChess,
+                    mWidth - mDxBoard - mChessRadius, mDxBoard + 5 * mChessRadius + 2 * mDxChess, paint);
+        } else if(model == 2) {
+            //画陷阱
+            drawTrap(canvas, paint);
+            //画河流
+            drawRiver(canvas, paint);
+            //画方格
+            paint.setStrokeWidth(5);
+            path.reset();
+            path.moveTo(mDxBoard, mDxBoard);
+            path.lineTo(mWidth - mDxBoard, mDxBoard);
+            path.lineTo(mWidth - mDxBoard, mDxBoard + 9 * mDxOneBoard);
+            path.lineTo(mDxBoard, mDxBoard + 9 * mDxOneBoard);
+            path.close();
+            canvas.drawPath(path, paint);
+            path.reset();
+            for (int i = 1; i < 7; i++) {
+                canvas.drawLine(mDxBoard + i * mDxOneBoard, mDxBoard, mDxBoard + i * mDxOneBoard, mDxBoard + 9 * mDxOneBoard, paint);
+            }
+            for (int i = 1; i < 9; i++) {
+                canvas.drawLine(mDxBoard, mDxBoard + i* mDxOneBoard, mWidth - mDxBoard, mDxBoard + i* mDxOneBoard, paint);
+            }
+        }
+    }
+
+    private void drawRiver(Canvas canvas, Paint paint) {
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(Color.GREEN);
+        canvas.drawRect(mDxBoard + mDxOneBoard, mDxBoard + 3 * mDxOneBoard, mDxBoard + 3 * mDxOneBoard, mDxBoard + 6 * mDxOneBoard, paint);
+        canvas.drawRect(mDxBoard + 4 * mDxOneBoard, mDxBoard + 3 * mDxOneBoard, mDxBoard + 6 * mDxOneBoard, mDxBoard + 6 * mDxOneBoard, paint);
+    }
+
+    private void drawTrap(Canvas canvas, Paint paint) {
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(Color.GRAY);
+        canvas.drawRect(mDxBoard + 2 * mDxOneBoard, mDxBoard, mDxBoard + 3 * mDxOneBoard, mDxBoard + mDxOneBoard, paint);
+        canvas.drawRect(mDxBoard + 4 * mDxOneBoard, mDxBoard, mDxBoard + 5 * mDxOneBoard, mDxBoard + mDxOneBoard, paint);
+        canvas.drawRect(mDxBoard + 3 * mDxOneBoard, mDxBoard + mDxOneBoard, mDxBoard + 4 * mDxOneBoard, mDxBoard + 2 * mDxOneBoard, paint);
+        canvas.drawRect(mDxBoard + 3 * mDxOneBoard, mDxBoard + 7 * mDxOneBoard, mDxBoard + 4 * mDxOneBoard, mDxBoard + 8 *mDxOneBoard, paint);
+        canvas.drawRect(mDxBoard + 2 * mDxOneBoard, mDxBoard + 8 *mDxOneBoard, mDxBoard + 3 * mDxOneBoard, mDxBoard + 9 *mDxOneBoard, paint);
+        canvas.drawRect(mDxBoard + 4 * mDxOneBoard, mDxBoard + 8 *mDxOneBoard, mDxBoard + 5 * mDxOneBoard, mDxBoard + 9 *mDxOneBoard, paint);
     }
 
     private void drawBG(Canvas canvas) {

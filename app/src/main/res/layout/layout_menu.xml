@@ -73,6 +73,29 @@
         android:layout_marginTop="15dp"/>
 
     <Button
+        android:id="@+id/btn_model1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="简单模式"
+        android:gravity="center"
+        android:layout_marginTop="5dp"
+        android:paddingLeft="50dp"
+        android:paddingRight="50dp"
+        android:background="@drawable/model_btn_normal"/>
+
+    <Button
+        android:id="@+id/btn_model2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="经典模式"
+        android:gravity="center"
+        android:paddingLeft="50dp"
+        android:paddingRight="50dp"
+        android:background="@drawable/model_btn_normal"/>
+
+    <Button
         android:id="@+id/btn_music"
         android:layout_width="32dp"
         android:layout_height="32dp"

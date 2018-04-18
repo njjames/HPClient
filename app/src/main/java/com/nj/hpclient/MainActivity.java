@@ -93,6 +93,9 @@ public class MainActivity extends AppCompatActivity {
     private int fileSize;
     private Button mBtnMusic;
     private boolean mIsMusicOn;
+    private Button mBtnModel1;
+    private Button mBtnModel2;
+    private int mCurrentModel = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -481,9 +484,13 @@ public class MainActivity extends AppCompatActivity {
                         mClient.cancelFind();
                         mIsFinding = false;
                     }else {
-                        mBtnFindGame.setText("取消匹配");
-                        mClient.findGame();
-                        mIsFinding = true;
+                        if (mCurrentModel == 0) {
+                            Toast.makeText(MainActivity.this, "请选择游戏模式！", Toast.LENGTH_SHORT).show();
+                        }else {
+                            mBtnFindGame.setText("取消匹配");
+                            mClient.findGame(mCurrentModel);
+                            mIsFinding = true;
+                        }
                     }
                     break;
                 case R.id.btn_music:
@@ -505,7 +512,16 @@ public class MainActivity extends AppCompatActivity {
                         SPUtil.putBoolean(MainActivity.this, "music", true);
                     }
                     break;
-
+                case R.id.btn_model1:
+                    mCurrentModel = 1;
+                    mBtnModel1.setBackgroundResource(R.drawable.model_btn_press);
+                    mBtnModel2.setBackgroundResource(R.drawable.model_btn_normal);
+                    break;
+                case R.id.btn_model2:
+                    mCurrentModel = 2;
+                    mBtnModel2.setBackgroundResource(R.drawable.model_btn_press);
+                    mBtnModel1.setBackgroundResource(R.drawable.model_btn_normal);
+                    break;
             }
         }
     }
@@ -595,7 +611,7 @@ public class MainActivity extends AppCompatActivity {
     private void gameView() {
         if (thisView != GAME_VIEW) {
             thisView = GAME_VIEW;
-            mGameView = new GameView(this, mClient, mGameViewListener);
+            mGameView = new GameView(this, mClient, mCurrentModel, mGameViewListener);
             setContentView(mGameView);
         }
     }
@@ -661,9 +677,13 @@ public class MainActivity extends AppCompatActivity {
             mTvDrcount = findViewById(R.id.tv_drcount);
             mIvHead = findViewById(R.id.iv_head);
             mBtnMusic = findViewById(R.id.btn_music);
+            mBtnModel1 = findViewById(R.id.btn_model1);
+            mBtnModel2 = findViewById(R.id.btn_model2);
             mBtnLogout.setOnClickListener(mClickListener);
             mBtnFindGame.setOnClickListener(mClickListener);
             mBtnMusic.setOnClickListener(mClickListener);
+            mBtnModel1.setOnClickListener(mClickListener);
+            mBtnModel2.setOnClickListener(mClickListener);
         }
         //如果当前显示的就是这个界面，直接加载数据
         int head = Integer.parseInt(mLocalUser.getHead());

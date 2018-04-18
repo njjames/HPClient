@@ -326,8 +326,8 @@ public class Client implements Runnable {
         sendLine("sign:" + mUser.toString());
     }
 
-    public void findGame() {
-        sendLine("findgame");
+    public void findGame(int currentModel) {
+        sendLine("findgame:" + currentModel);
     }
 
     public void cancelFind() {
