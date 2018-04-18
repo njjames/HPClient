@@ -101,7 +101,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
             mDxOneBoard = (mWidth - 2 * mDxBoard) / 7;
             //棋盘总共占的高度
             mBoardHeight = mDxOneBoard * 9 + 2 * mDxBoard;
-
+            mChessRadius = mDxOneBoard / 2 - 10;
         }
     }
 
@@ -310,70 +310,170 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
      * @param paint
      */
     private void drawChess(Canvas canvas, Paint paint) {
+        //        int[][] map = {
+        //                {107, 0, 0, 0, 0, 0, 106},
+        //                {0, 103, 0, 0, 0, 102, 0},
+        //                {101, 0, 105, 0, 104, 0, 108},
+        //                {0, 0, 0, 0, 0, 0, 0},
+        //                {0, 0, 0, 0, 0, 0, 0},
+        //                {0, 0, 0, 0, 0, 0, 0},
+        //                {208, 0, 204, 0, 205, 0, 201},
+        //                {0, 202, 0, 0, 0, 203, 0},
+        //                {206, 0, 0, 0, 0, 0, 207}
+        //        };
         int[][] map = mClient.mGame.getMap();
         //开始游戏的时候如果从服务器获取用户信息比获取游戏信息早，就会出现null
         if (map != null) {
-            paint.setStyle(Paint.Style.FILL);
-            paint.setTextSize(80f);
-            for (int i = 0; i < 4; i++) {
-                for (int j = 0; j < 4; j++) {
-                    //小于0.说明是没有翻开的牌
-                    if (map[i][j] < 0) {
-                        drawChessBG(j, i, canvas, paint);
+            if (model == 1) {
+                paint.setStyle(Paint.Style.FILL);
+                paint.setTextSize(80f);
+                for (int i = 0; i < 4; i++) {
+                    for (int j = 0; j < 4; j++) {
+                        //小于0.说明是没有翻开的牌
+                        if (map[i][j] < 0) {
+                            drawChessBG(j, i, canvas, paint);
+                        }
+                        switch (map[i][j]) {
+                            case 101:
+                                drawOneChess("鼠", j, i, canvas, paint, 1);
+                                break;
+                            case 102:
+                                drawOneChess("猫", j, i, canvas, paint, 1);
+                                break;
+                            case 103:
+                                drawOneChess("狗", j, i, canvas, paint, 1);
+                                break;
+                            case 104:
+                                drawOneChess("狼", j, i, canvas, paint, 1);
+                                break;
+                            case 105:
+                                drawOneChess("豹", j, i, canvas, paint, 1);
+                                break;
+                            case 106:
+                                drawOneChess("虎", j, i, canvas, paint, 1);
+                                break;
+                            case 107:
+                                drawOneChess("狮", j, i, canvas, paint, 1);
+                                break;
+                            case 108:
+                                drawOneChess("象", j, i, canvas, paint, 1);
+                                break;
+                            case 201:
+                                drawOneChess("鼠", j, i, canvas, paint, 2);
+                                break;
+                            case 202:
+                                drawOneChess("猫", j, i, canvas, paint, 2);
+                                break;
+                            case 203:
+                                drawOneChess("狗", j, i, canvas, paint, 2);
+                                break;
+                            case 204:
+                                drawOneChess("狼", j, i, canvas, paint, 2);
+                                break;
+                            case 205:
+                                drawOneChess("豹", j, i, canvas, paint, 2);
+                                break;
+                            case 206:
+                                drawOneChess("虎", j, i, canvas, paint, 2);
+                                break;
+                            case 207:
+                                drawOneChess("狮", j, i, canvas, paint, 2);
+                                break;
+                            case 208:
+                                drawOneChess("象", j, i, canvas, paint, 2);
+                                break;
+                        }
                     }
-                    switch (map[i][j]) {
-                        case 101:
-                            drawOneChess("鼠", j, i, canvas, paint, 1);
-                            break;
-                        case 102:
-                            drawOneChess("猫", j, i, canvas, paint, 1);
-                            break;
-                        case 103:
-                            drawOneChess("狗", j, i, canvas, paint, 1);
-                            break;
-                        case 104:
-                            drawOneChess("狼", j, i, canvas, paint, 1);
-                            break;
-                        case 105:
-                            drawOneChess("豹", j, i, canvas, paint, 1);
-                            break;
-                        case 106:
-                            drawOneChess("虎", j, i, canvas, paint, 1);
-                            break;
-                        case 107:
-                            drawOneChess("狮", j, i, canvas, paint, 1);
-                            break;
-                        case 108:
-                            drawOneChess("象", j, i, canvas, paint, 1);
-                            break;
-                        case 201:
-                            drawOneChess("鼠", j, i, canvas, paint, 2);
-                            break;
-                        case 202:
-                            drawOneChess("猫", j, i, canvas, paint, 2);
-                            break;
-                        case 203:
-                            drawOneChess("狗", j, i, canvas, paint, 2);
-                            break;
-                        case 204:
-                            drawOneChess("狼", j, i, canvas, paint, 2);
-                            break;
-                        case 205:
-                            drawOneChess("豹", j, i, canvas, paint, 2);
-                            break;
-                        case 206:
-                            drawOneChess("虎", j, i, canvas, paint, 2);
-                            break;
-                        case 207:
-                            drawOneChess("狮", j, i, canvas, paint, 2);
-                            break;
-                        case 208:
-                            drawOneChess("象", j, i, canvas, paint, 2);
-                            break;
+                }
+            } else if(model == 2) {
+                paint.setStyle(Paint.Style.FILL);
+                paint.setTextSize(80f);
+                for (int i = 0; i < 9; i++) {
+                    for (int j = 0; j < 7; j++) {
+                        switch (map[i][j]) {
+                            case 101:
+                                drawOneChess2("鼠", j, i, canvas, paint, 1);
+                                break;
+                            case 102:
+                                drawOneChess2("猫", j, i, canvas, paint, 1);
+                                break;
+                            case 103:
+                                drawOneChess2("狗", j, i, canvas, paint, 1);
+                                break;
+                            case 104:
+                                drawOneChess2("狼", j, i, canvas, paint, 1);
+                                break;
+                            case 105:
+                                drawOneChess2("豹", j, i, canvas, paint, 1);
+                                break;
+                            case 106:
+                                drawOneChess2("虎", j, i, canvas, paint, 1);
+                                break;
+                            case 107:
+                                drawOneChess2("狮", j, i, canvas, paint, 1);
+                                break;
+                            case 108:
+                                drawOneChess2("象", j, i, canvas, paint, 1);
+                                break;
+                            case 201:
+                                drawOneChess2("鼠", j, i, canvas, paint, 2);
+                                break;
+                            case 202:
+                                drawOneChess2("猫", j, i, canvas, paint, 2);
+                                break;
+                            case 203:
+                                drawOneChess2("狗", j, i, canvas, paint, 2);
+                                break;
+                            case 204:
+                                drawOneChess2("狼", j, i, canvas, paint, 2);
+                                break;
+                            case 205:
+                                drawOneChess2("豹", j, i, canvas, paint, 2);
+                                break;
+                            case 206:
+                                drawOneChess2("虎", j, i, canvas, paint, 2);
+                                break;
+                            case 207:
+                                drawOneChess2("狮", j, i, canvas, paint, 2);
+                                break;
+                            case 208:
+                                drawOneChess2("象", j, i, canvas, paint, 2);
+                                break;
+                        }
                     }
                 }
             }
         }
+    }
+
+    /**
+     * 画模式2的棋子
+     * @param chess
+     * @param i
+     * @param j
+     * @param canvas
+     * @param paint
+     * @param color
+     */
+    private void drawOneChess2(String chess, int i, int j, Canvas canvas, Paint paint, int color) {
+        paint.setStrokeWidth(20);
+        float initX = mDxBoard + mDxOneBoard / 2;
+        float initY = mDxBoard + mDxOneBoard / 2;
+        float x = initX + i * mDxOneBoard;
+        float y = initY + j * mDxOneBoard;
+        if (color == 1) {
+            paint.setColor(Color.parseColor("#0000ff"));
+        }else {
+            paint.setColor(Color.parseColor("#ff0000"));
+        }
+        canvas.drawCircle(x, y, mChessRadius, paint);
+        if (color == 1) {
+            paint.setColor(Color.parseColor("#ffffff"));
+        }else {
+            paint.setColor(Color.parseColor("#000000"));
+        }
+        paint.setStrokeWidth(5f);
+        canvas.drawText(chess, x-40, y+30, paint);
     }
 
     /**
@@ -452,12 +552,16 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
             canvas.drawLine(mDxBoard + mChessRadius, mDxBoard + 5 * mChessRadius + 2 * mDxChess,
                     mWidth - mDxBoard - mChessRadius, mDxBoard + 5 * mChessRadius + 2 * mDxChess, paint);
         } else if(model == 2) {
+            //画老巢
+            drawBoss(canvas, paint);
             //画陷阱
             drawTrap(canvas, paint);
             //画河流
             drawRiver(canvas, paint);
             //画方格
             paint.setStrokeWidth(5);
+            paint.setColor(Color.BLACK);
+            paint.setStyle(Paint.Style.STROKE);
             path.reset();
             path.moveTo(mDxBoard, mDxBoard);
             path.lineTo(mWidth - mDxBoard, mDxBoard);
@@ -473,6 +577,13 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
                 canvas.drawLine(mDxBoard, mDxBoard + i* mDxOneBoard, mWidth - mDxBoard, mDxBoard + i* mDxOneBoard, paint);
             }
         }
+    }
+
+    private void drawBoss(Canvas canvas, Paint paint) {
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(Color.YELLOW);
+        canvas.drawRect(mDxBoard + 3 * mDxOneBoard, mDxBoard, mDxBoard + 4 * mDxOneBoard, mDxBoard + mDxOneBoard, paint);
+        canvas.drawRect(mDxBoard + 3 * mDxOneBoard, mDxBoard + 8 * mDxOneBoard, mDxBoard + 4 * mDxOneBoard, mDxBoard + 9 *mDxOneBoard, paint);
     }
 
     private void drawRiver(Canvas canvas, Paint paint) {
