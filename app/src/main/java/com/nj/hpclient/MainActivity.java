@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -46,11 +47,14 @@ public class MainActivity extends AppCompatActivity {
     private MyClickListener mClickListener;
     private MyGameViewListener mGameViewListener;
 
+    private String mIp;
+
     @SuppressLint("HandlerLeak")
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            mClient = new Client("192.168.16.122", 9898, mClientListener);
+            mIp = SPUtil.getString(MainActivity.this, "ip", "192.168.16.122");
+            mClient = new Client(mIp, 9898, mClientListener);
             mClient.connect();
         }
     };
@@ -90,12 +94,15 @@ public class MainActivity extends AppCompatActivity {
     private int mVersionCode = 0;
     private AlertDialog mUpdateDialog;
     private ProgressDialog mDownloadProgressDialog;
+    private ProgressDialog mConnectDialog;
     private int fileSize;
     private Button mBtnMusic;
     private boolean mIsMusicOn;
     private Button mBtnModel1;
     private Button mBtnModel2;
     private int mCurrentModel = 0;
+    private Button mBtnSetting;
+    private AlertDialog mSettingDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,6 +143,10 @@ public class MainActivity extends AppCompatActivity {
     private class MyClientListener implements Client.ClientListener{
         @Override
         public void onConnect() {
+            if(mConnectDialog != null) {
+                mConnectDialog.dismiss();
+            }
+            SPUtil.putString(MainActivity.this, "ip", mIp);
             mClient.checkVersion();
         }
 
@@ -149,6 +160,10 @@ public class MainActivity extends AppCompatActivity {
         public void onConnectFailed() {
             //连接服务器失败，弹出提示
             Toast.makeText(MainActivity.this, "网络连接失败！请检查网络设置后重新启动。", Toast.LENGTH_SHORT).show();
+            if(mConnectDialog != null) {
+                mConnectDialog.dismiss();
+            }
+            showSettingDialog();
         }
 
         @Override
@@ -513,17 +528,81 @@ public class MainActivity extends AppCompatActivity {
                     }
                     break;
                 case R.id.btn_model1:
-                    mCurrentModel = 1;
-                    mBtnModel1.setBackgroundResource(R.drawable.model_btn_press);
-                    mBtnModel2.setBackgroundResource(R.drawable.model_btn_normal);
+                    //只有现在没有正在匹配，才更新
+                    if (!mIsFinding) {
+                        mCurrentModel = 1;
+                        mBtnModel1.setBackgroundColor(Color.GREEN);
+                        mBtnModel2.setBackgroundColor(Color.parseColor("#999999"));
+                    }
                     break;
                 case R.id.btn_model2:
-                    mCurrentModel = 2;
-                    mBtnModel2.setBackgroundResource(R.drawable.model_btn_press);
-                    mBtnModel1.setBackgroundResource(R.drawable.model_btn_normal);
+                    if (!mIsFinding) {
+                        mCurrentModel = 2;
+                        mBtnModel2.setBackgroundColor(Color.GREEN);
+                        mBtnModel1.setBackgroundColor(Color.parseColor("#999999"));
+                    }
+                    break;
+                case R.id.btn_setting:
+                    showSettingDialog();
                     break;
             }
         }
+    }
+
+    /**
+     * 显示设置的对话框
+     */
+    private void showSettingDialog() {
+        if (mSettingDialog == null) {
+            LayoutInflater layoutInflater = LayoutInflater.from(this);
+            View settingView = layoutInflater.inflate(R.layout.dialog_setting, null);
+            TextView tvOldIp = settingView.findViewById(R.id.tv_oldip);
+            final EditText tvnewIp = settingView.findViewById(R.id.et_newip);
+            String ip = SPUtil.getString(MainActivity.this, "ip", "");
+            if(TextUtils.isEmpty(ip)) {
+                tvOldIp.setText("最近没有连接过服务器");
+            } else {
+                tvOldIp.setText("上次登录服务器IP:" + ip);
+            }
+            mSettingDialog = new AlertDialog.Builder(this)
+                    .setView(settingView)
+                    .setTitle("设置")
+                    .setPositiveButton("完成", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            if (TextUtils.isEmpty(tvnewIp.getText().toString().trim())) {
+                                Toast.makeText(MainActivity.this, "请输入ip地址！", Toast.LENGTH_SHORT).show();
+                            } else {
+                                mClient.close();
+                                mIp = tvnewIp.getText().toString().trim();
+                                mClient = new Client(mIp, 9898, mClientListener);
+                                mClient.connect();
+                                mSettingDialog.dismiss();
+                                showConnectDialog();
+                                loginView();
+                            }
+                        }
+                    })
+                    .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            mSettingDialog.dismiss();
+                        }
+                    })
+                    .create();
+        }
+        mSettingDialog.show();
+    }
+
+    private void showConnectDialog() {
+        if (mConnectDialog == null) {
+            mConnectDialog = new ProgressDialog(this);
+            mConnectDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            mConnectDialog.setCancelable(false);
+            mConnectDialog.setCanceledOnTouchOutside(false);
+            mConnectDialog.setTitle("正在连接服务器");
+        }
+        mConnectDialog.show();
     }
 
     public class MyGameViewListener implements GameView.GameViewListener {
@@ -592,7 +671,13 @@ public class MainActivity extends AppCompatActivity {
     private void showHelpDialog() {
         if (mHelpDialog == null) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            mHelpDialog = builder.setMessage(R.string.help)
+            int msg_help = 0;
+            if (mCurrentModel == 1) {
+                msg_help = R.string.help;
+            } else {
+                msg_help = R.string.help_model2;
+            }
+            mHelpDialog = builder.setMessage(msg_help)
                     .setTitle("帮助")
                     .setPositiveButton("好的", new DialogInterface.OnClickListener() {
                         @Override
@@ -679,11 +764,13 @@ public class MainActivity extends AppCompatActivity {
             mBtnMusic = findViewById(R.id.btn_music);
             mBtnModel1 = findViewById(R.id.btn_model1);
             mBtnModel2 = findViewById(R.id.btn_model2);
+            mBtnSetting = findViewById(R.id.btn_setting);
             mBtnLogout.setOnClickListener(mClickListener);
             mBtnFindGame.setOnClickListener(mClickListener);
             mBtnMusic.setOnClickListener(mClickListener);
             mBtnModel1.setOnClickListener(mClickListener);
             mBtnModel2.setOnClickListener(mClickListener);
+            mBtnSetting.setOnClickListener(mClickListener);
         }
         //如果当前显示的就是这个界面，直接加载数据
         int head = Integer.parseInt(mLocalUser.getHead());

@@ -16,6 +16,8 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 
+import java.util.logging.Level;
+
 /**
  * Created by Administrator on 2018-03-31.
  */
@@ -47,6 +49,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
     private int model;
     private float mBoardHeight;
     private float mBoardWidth;
+    private float mUsernameHeight;
     //    //判断是那一边的，初始值是0，第一次点击翻开的是哪一方就是哪一方
 //    private int witchSide = 0;
 
@@ -95,13 +98,21 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
             mBoardLeftY = 10 + mChessRadius;
             //棋盘每行之间的间距
             mDxOneBoard = 2 * mChessRadius + mDxChess;
+            mBoardWidth = mWidth - mDxBoard;
+            mBoardHeight = mWidth - mDxBoard;
+            mUsernameHeight = mWidth + 2 * mDxBoard;
         } else if(model == 2){
             mDxBoard = 10f;
             //棋盘每行之间的间距
             mDxOneBoard = (mWidth - 2 * mDxBoard) / 7;
+            mBoardWidth = mWidth - mDxBoard;
             //棋盘总共占的高度
-            mBoardHeight = mDxOneBoard * 9 + 2 * mDxBoard;
+            mBoardHeight = mDxOneBoard * 9 + mDxBoard;
             mChessRadius = mDxOneBoard / 2 - 10;
+            //棋盘左上角的坐标
+            mBoardLeftX = mDxBoard;
+            mBoardLeftY = mDxBoard;
+            mUsernameHeight = mBoardHeight + mDxBoard + 80;
         }
     }
 
@@ -127,8 +138,12 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
         while (isDrawing) {
             try {
                 mCanvas = mSurfaceHolder.lockCanvas();
-                mCanvas.drawColor(Color.WHITE);
-                doDraw(mCanvas);
+                if (mCanvas != null) {
+                    synchronized (mSurfaceHolder) {
+                        mCanvas.drawColor(Color.WHITE);
+                        doDraw(mCanvas);
+                    }
+                }
             } finally {
                 if (mCanvas != null) {
                     mSurfaceHolder.unlockCanvasAndPost(mCanvas);
@@ -160,10 +175,17 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
      */
     private void drawBtnMenu(Canvas canvas, Paint paint) {
         if (mMenuBtnRect == null) {
-            mMenuBtnRect = new RectF(mDxBoard,
-                    mWidth + 2 * mDxBoard + 80 + Img.getHead(Integer.parseInt(mMyHead)).getHeight() + 20,
-                    mWidth - mDxBoard,
-                    mWidth + 2 * mDxBoard + 80 + Img.getHead(Integer.parseInt(mMyHead)).getHeight() + 120);
+            if (model == 1) {
+                mMenuBtnRect = new RectF(mDxBoard,
+                        mWidth + 2 * mDxBoard + 80 + Img.getHead(Integer.parseInt(mMyHead)).getHeight() + 20,
+                        mWidth - mDxBoard,
+                        mWidth + 2 * mDxBoard + 80 + Img.getHead(Integer.parseInt(mMyHead)).getHeight() + 120);
+            } else if (model == 2) {
+                mMenuBtnRect = new RectF(mDxBoard,
+                        mUsernameHeight + 40,
+                        mWidth - mDxBoard,
+                        mUsernameHeight + 140);
+            }
         }
         if (mMenuBtnDown) {
             paint.setColor(0xaa6699ff);
@@ -191,73 +213,118 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
         paint.setStrokeWidth(5);
         paint.setStyle(Paint.Style.FILL);
         String otherName = mClient.mGame.getOtherUser(mClient.getUser()).getName();
-        mMyHead = mClient.getUser().getHead();
-        mOtherHead = mClient.mGame.getOtherUser(mClient.getUser()).getHead();
         Rect rect = new Rect();
         paint.getTextBounds(otherName, 0, otherName.length(), rect);
-        if (mClient.getUser().whichSide == 0) {
-            paint.setColor(Color.BLACK);
-            if (canSelect) {
-                drawLeftArrow(canvas, rect);
-                setPaintText(paint, true);
-                canvas.drawText(mClient.getUser().getName(), mDxBoard, mWidth + 2 * mDxBoard, paint);
-                setPaintText(paint, false);
-                canvas.drawText(otherName, mWidth - mDxBoard - rect.width(), mWidth + 2 * mDxBoard, paint);
-            }else {
-                drawRightArrow(canvas, rect);
-                setPaintText(paint, false);
-                canvas.drawText(mClient.getUser().getName(), mDxBoard, mWidth + 2 * mDxBoard, paint);
-                setPaintText(paint, true);
-                canvas.drawText(otherName, mWidth - mDxBoard - rect.width(), mWidth + 2 * mDxBoard, paint);
+        //只有模式1才画头像
+        if(model == 1) {
+            if (mClient.getUser().whichSide == 0) {
+                paint.setColor(Color.BLACK);
+                if (canSelect) {
+                    drawLeftArrow(canvas, rect);
+                    setPaintText(paint, true);
+                    canvas.drawText(mClient.getUser().getName(), mDxBoard, mUsernameHeight, paint);
+                    setPaintText(paint, false);
+                    canvas.drawText(otherName, mWidth - mDxBoard - rect.width(), mUsernameHeight, paint);
+                }else {
+                    drawRightArrow(canvas, rect);
+                    setPaintText(paint, false);
+                    canvas.drawText(mClient.getUser().getName(), mDxBoard, mUsernameHeight, paint);
+                    setPaintText(paint, true);
+                    canvas.drawText(otherName, mWidth - mDxBoard - rect.width(), mUsernameHeight, paint);
+                }
+            }else if(mClient.getUser().whichSide == 1) {
+                if (canSelect) {
+                    drawLeftArrow(canvas, rect);
+                    setPaintText(paint, true);
+                    paint.setColor(Color.parseColor("#0000ff"));
+                    canvas.drawText(mClient.getUser().getName(), mDxBoard, mUsernameHeight, paint);
+                    setPaintText(paint, false);
+                    paint.setColor(Color.parseColor("#ff0000"));
+                    canvas.drawText(otherName, mWidth - mDxBoard - rect.width(), mUsernameHeight, paint);
+                }else {
+                    drawRightArrow(canvas, rect);
+                    setPaintText(paint, false);
+                    paint.setColor(Color.parseColor("#0000ff"));
+                    canvas.drawText(mClient.getUser().getName(), mDxBoard, mUsernameHeight, paint);
+                    setPaintText(paint, true);
+                    paint.setColor(Color.parseColor("#ff0000"));
+                    canvas.drawText(otherName, mWidth - mDxBoard - rect.width(), mUsernameHeight, paint);
+                }
+            }else if(mClient.getUser().whichSide == 2) {
+                if (canSelect) {
+                    drawLeftArrow(canvas, rect);
+                    setPaintText(paint, true);
+                    paint.setColor(Color.parseColor("#ff0000"));
+                    canvas.drawText(mClient.getUser().getName(), mDxBoard, mUsernameHeight, paint);
+                    setPaintText(paint, false);
+                    paint.setColor(Color.parseColor("#0000ff"));
+                    canvas.drawText(otherName, mWidth - mDxBoard - rect.width(), mUsernameHeight, paint);
+                }else {
+                    drawRightArrow(canvas, rect);
+                    setPaintText(paint, false);
+                    paint.setColor(Color.parseColor("#ff0000"));
+                    canvas.drawText(mClient.getUser().getName(), mDxBoard, mUsernameHeight, paint);
+                    setPaintText(paint, true);
+                    paint.setColor(Color.parseColor("#0000ff"));
+                    canvas.drawText(otherName, mWidth - mDxBoard - rect.width(), mUsernameHeight, paint);
+                }
             }
-        }else if(mClient.getUser().whichSide == 1) {
-            if (canSelect) {
-                drawLeftArrow(canvas, rect);
-                setPaintText(paint, true);
-                paint.setColor(Color.parseColor("#0000ff"));
-                canvas.drawText(mClient.getUser().getName(), mDxBoard, mWidth + 2 * mDxBoard, paint);
-                setPaintText(paint, false);
-                paint.setColor(Color.parseColor("#ff0000"));
-                canvas.drawText(otherName, mWidth - mDxBoard - rect.width(), mWidth + 2 * mDxBoard, paint);
+            mMyHead = mClient.getUser().getHead();
+            mOtherHead = mClient.mGame.getOtherUser(mClient.getUser()).getHead();
+            canvas.drawBitmap(Img.getHead(Integer.parseInt(mMyHead)), mDxBoard, mWidth + 2 * mDxBoard + 20, paint);
+            canvas.drawBitmap(Img.getHead(Integer.parseInt(mOtherHead)), mWidth - mDxBoard - Img.getHead(Integer.parseInt(mOtherHead)).getWidth(), mWidth + 2 * mDxBoard + 20, paint);
+        }else if(model == 2) {
+            if(mClient.isBlack()) {
+                if (canSelect) {
+                    drawLeftArrow(canvas, rect);
+                    setPaintText(paint, true);
+                    paint.setColor(Color.parseColor("#0000ff"));
+                    canvas.drawText(mClient.getUser().getName(), mDxBoard, mUsernameHeight, paint);
+                    setPaintText(paint, false);
+                    paint.setColor(Color.parseColor("#ff0000"));
+                    paint.getTextBounds(otherName, 0, otherName.length(), rect);
+                    canvas.drawText(otherName, mWidth - mDxBoard - rect.width(), mUsernameHeight, paint);
+                }else {
+                    drawRightArrow(canvas, rect);
+                    setPaintText(paint, false);
+                    paint.setColor(Color.parseColor("#0000ff"));
+                    canvas.drawText(mClient.getUser().getName(), mDxBoard, mUsernameHeight, paint);
+                    setPaintText(paint, true);
+                    paint.setColor(Color.parseColor("#ff0000"));
+                    paint.getTextBounds(otherName, 0, otherName.length(), rect);
+                    canvas.drawText(otherName, mWidth - mDxBoard - rect.width(), mUsernameHeight, paint);
+                }
             }else {
-                drawRightArrow(canvas, rect);
-                setPaintText(paint, false);
-                paint.setColor(Color.parseColor("#0000ff"));
-                canvas.drawText(mClient.getUser().getName(), mDxBoard, mWidth + 2 * mDxBoard, paint);
-                setPaintText(paint, true);
-                paint.setColor(Color.parseColor("#ff0000"));
-                canvas.drawText(otherName, mWidth - mDxBoard - rect.width(), mWidth + 2 * mDxBoard, paint);
-            }
-        }else if(mClient.getUser().whichSide == 2) {
-            if (canSelect) {
-                drawLeftArrow(canvas, rect);
-                setPaintText(paint, true);
-                paint.setColor(Color.parseColor("#ff0000"));
-                canvas.drawText(mClient.getUser().getName(), mDxBoard, mWidth + 2 * mDxBoard, paint);
-                setPaintText(paint, false);
-                paint.setColor(Color.parseColor("#0000ff"));
-                canvas.drawText(otherName, mWidth - mDxBoard - rect.width(), mWidth + 2 * mDxBoard, paint);
-            }else {
-                drawRightArrow(canvas, rect);
-                setPaintText(paint, false);
-                paint.setColor(Color.parseColor("#ff0000"));
-                canvas.drawText(mClient.getUser().getName(), mDxBoard, mWidth + 2 * mDxBoard, paint);
-                setPaintText(paint, true);
-                paint.setColor(Color.parseColor("#0000ff"));
-                canvas.drawText(otherName, mWidth - mDxBoard - rect.width(), mWidth + 2 * mDxBoard, paint);
+                if (canSelect) {
+                    drawLeftArrow(canvas, rect);
+                    setPaintText(paint, true);
+                    paint.setColor(Color.parseColor("#ff0000"));
+                    canvas.drawText(mClient.getUser().getName(), mDxBoard, mUsernameHeight, paint);
+                    setPaintText(paint, false);
+                    paint.setColor(Color.parseColor("#0000ff"));
+                    paint.getTextBounds(otherName, 0, otherName.length(), rect);
+                    canvas.drawText(otherName, mWidth - mDxBoard - rect.width(), mUsernameHeight, paint);
+                }else {
+                    drawRightArrow(canvas, rect);
+                    setPaintText(paint, false);
+                    paint.setColor(Color.parseColor("#ff0000"));
+                    canvas.drawText(mClient.getUser().getName(), mDxBoard, mUsernameHeight, paint);
+                    setPaintText(paint, true);
+                    paint.setColor(Color.parseColor("#0000ff"));
+                    paint.getTextBounds(otherName, 0, otherName.length(), rect);
+                    canvas.drawText(otherName, mWidth - mDxBoard - rect.width(), mUsernameHeight, paint);
+                }
             }
         }
-        canvas.drawBitmap(Img.getHead(Integer.parseInt(mMyHead)), mDxBoard, mWidth + 2 * mDxBoard + 20, paint);
-        canvas.drawBitmap(Img.getHead(Integer.parseInt(mOtherHead)), mWidth - mDxBoard - Img.getHead(Integer.parseInt(mOtherHead)).getWidth(), mWidth + 2 * mDxBoard + 20, paint);
     }
 
     private void drawLeftArrow(Canvas canvas, Rect rect) {
         Paint paint = new Paint();
         paint.setColor(Color.BLACK);
         Path path = new Path();
-        path.moveTo(mWidth / 2, mWidth + 2 * mDxBoard - rect.height());
-        path.lineTo(mWidth / 2, mWidth + 2 * mDxBoard);
-        path.lineTo(mWidth / 2 - rect.height(), mWidth + 2 * mDxBoard - rect.height() / 2);
+        path.moveTo(mWidth / 2, mUsernameHeight - rect.height());
+        path.lineTo(mWidth / 2, mUsernameHeight);
+        path.lineTo(mWidth / 2 - rect.height(), mUsernameHeight - rect.height() / 2);
         path.close();
         canvas.drawPath(path, paint);
     }
@@ -266,9 +333,9 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
         Paint paint = new Paint();
         paint.setColor(Color.BLACK);
         Path path = new Path();
-        path.moveTo(mWidth / 2, mWidth + 2 * mDxBoard - rect.height());
-        path.lineTo(mWidth / 2, mWidth + 2 * mDxBoard);
-        path.lineTo(mWidth / 2 + rect.height(), mWidth + 2 * mDxBoard - rect.height() / 2);
+        path.moveTo(mWidth / 2, mUsernameHeight - rect.height());
+        path.lineTo(mWidth / 2, mUsernameHeight);
+        path.lineTo(mWidth / 2 + rect.height(), mUsernameHeight - rect.height() / 2);
         path.close();
         canvas.drawPath(path, paint);
     }
@@ -294,11 +361,20 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
         paint.setColor(Color.GREEN);
         if (canSelect) {
             if (select != null) {
-                float initX = mDxBoard + mChessRadius;
-                float initY = mDxBoard + mChessRadius;
-                float x = initX + (select.x - 1)*mDxChess + (select.x - 1)*2*mChessRadius;
-                float y = initY + (select.y - 1)*mDxChess + (select.y - 1)*2*mChessRadius;
-                canvas.drawCircle(x, y, mChessRadius, paint);
+                if (model == 1) {
+                    float initX = mDxBoard + mChessRadius;
+                    float initY = mDxBoard + mChessRadius;
+                    float x = initX + (select.x - 1)*mDxChess + (select.x - 1)*2*mChessRadius;
+                    float y = initY + (select.y - 1)*mDxChess + (select.y - 1)*2*mChessRadius;
+                    canvas.drawCircle(x, y, mChessRadius, paint);
+                } else if(model == 2) {
+                    paint.setColor(Color.parseColor("#cc00ff"));
+                    float initX = mDxBoard + mDxOneBoard / 2;
+                    float initY = mDxBoard + mDxOneBoard / 2;
+                    float x = initX + (select.x - 1) * mDxOneBoard;
+                    float y = initY + (select.y - 1) * mDxOneBoard;
+                    canvas.drawCircle(x, y, mChessRadius, paint);
+                }
             }
         }
     }
@@ -310,17 +386,6 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
      * @param paint
      */
     private void drawChess(Canvas canvas, Paint paint) {
-        //        int[][] map = {
-        //                {107, 0, 0, 0, 0, 0, 106},
-        //                {0, 103, 0, 0, 0, 102, 0},
-        //                {101, 0, 105, 0, 104, 0, 108},
-        //                {0, 0, 0, 0, 0, 0, 0},
-        //                {0, 0, 0, 0, 0, 0, 0},
-        //                {0, 0, 0, 0, 0, 0, 0},
-        //                {208, 0, 204, 0, 205, 0, 201},
-        //                {0, 202, 0, 0, 0, 203, 0},
-        //                {206, 0, 0, 0, 0, 0, 207}
-        //        };
         int[][] map = mClient.mGame.getMap();
         //开始游戏的时候如果从服务器获取用户信息比获取游戏信息早，就会出现null
         if (map != null) {
@@ -387,57 +452,57 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
                 }
             } else if(model == 2) {
                 paint.setStyle(Paint.Style.FILL);
-                paint.setTextSize(80f);
+                paint.setTextSize(60f);
                 for (int i = 0; i < 9; i++) {
                     for (int j = 0; j < 7; j++) {
                         switch (map[i][j]) {
                             case 101:
-                                drawOneChess2("鼠", j, i, canvas, paint, 1);
+                                drawOneChess("鼠", j, i, canvas, paint, 1);
                                 break;
                             case 102:
-                                drawOneChess2("猫", j, i, canvas, paint, 1);
+                                drawOneChess("猫", j, i, canvas, paint, 1);
                                 break;
                             case 103:
-                                drawOneChess2("狗", j, i, canvas, paint, 1);
+                                drawOneChess("狗", j, i, canvas, paint, 1);
                                 break;
                             case 104:
-                                drawOneChess2("狼", j, i, canvas, paint, 1);
+                                drawOneChess("狼", j, i, canvas, paint, 1);
                                 break;
                             case 105:
-                                drawOneChess2("豹", j, i, canvas, paint, 1);
+                                drawOneChess("豹", j, i, canvas, paint, 1);
                                 break;
                             case 106:
-                                drawOneChess2("虎", j, i, canvas, paint, 1);
+                                drawOneChess("虎", j, i, canvas, paint, 1);
                                 break;
                             case 107:
-                                drawOneChess2("狮", j, i, canvas, paint, 1);
+                                drawOneChess("狮", j, i, canvas, paint, 1);
                                 break;
                             case 108:
-                                drawOneChess2("象", j, i, canvas, paint, 1);
+                                drawOneChess("象", j, i, canvas, paint, 1);
                                 break;
                             case 201:
-                                drawOneChess2("鼠", j, i, canvas, paint, 2);
+                                drawOneChess("鼠", j, i, canvas, paint, 2);
                                 break;
                             case 202:
-                                drawOneChess2("猫", j, i, canvas, paint, 2);
+                                drawOneChess("猫", j, i, canvas, paint, 2);
                                 break;
                             case 203:
-                                drawOneChess2("狗", j, i, canvas, paint, 2);
+                                drawOneChess("狗", j, i, canvas, paint, 2);
                                 break;
                             case 204:
-                                drawOneChess2("狼", j, i, canvas, paint, 2);
+                                drawOneChess("狼", j, i, canvas, paint, 2);
                                 break;
                             case 205:
-                                drawOneChess2("豹", j, i, canvas, paint, 2);
+                                drawOneChess("豹", j, i, canvas, paint, 2);
                                 break;
                             case 206:
-                                drawOneChess2("虎", j, i, canvas, paint, 2);
+                                drawOneChess("虎", j, i, canvas, paint, 2);
                                 break;
                             case 207:
-                                drawOneChess2("狮", j, i, canvas, paint, 2);
+                                drawOneChess("狮", j, i, canvas, paint, 2);
                                 break;
                             case 208:
-                                drawOneChess2("象", j, i, canvas, paint, 2);
+                                drawOneChess("象", j, i, canvas, paint, 2);
                                 break;
                         }
                     }
@@ -446,35 +511,6 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
         }
     }
 
-    /**
-     * 画模式2的棋子
-     * @param chess
-     * @param i
-     * @param j
-     * @param canvas
-     * @param paint
-     * @param color
-     */
-    private void drawOneChess2(String chess, int i, int j, Canvas canvas, Paint paint, int color) {
-        paint.setStrokeWidth(20);
-        float initX = mDxBoard + mDxOneBoard / 2;
-        float initY = mDxBoard + mDxOneBoard / 2;
-        float x = initX + i * mDxOneBoard;
-        float y = initY + j * mDxOneBoard;
-        if (color == 1) {
-            paint.setColor(Color.parseColor("#0000ff"));
-        }else {
-            paint.setColor(Color.parseColor("#ff0000"));
-        }
-        canvas.drawCircle(x, y, mChessRadius, paint);
-        if (color == 1) {
-            paint.setColor(Color.parseColor("#ffffff"));
-        }else {
-            paint.setColor(Color.parseColor("#000000"));
-        }
-        paint.setStrokeWidth(5f);
-        canvas.drawText(chess, x-40, y+30, paint);
-    }
 
     /**
      * 画棋牌的BG
@@ -503,10 +539,21 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
      */
     private void drawOneChess(String chess, int i, int j, Canvas canvas, Paint paint, int redorblack) {
         paint.setStrokeWidth(20);
-        float initX = mDxBoard + mChessRadius;
-        float initY = mDxBoard + mChessRadius;
-        float x = initX + i*mDxChess + i*2*mChessRadius;
-        float y = initY + j*mDxChess + j*2*mChessRadius;
+        float initX = 0;
+        float initY = 0;
+        float x = 0;
+        float y = 0;
+        if (model == 1) {
+            initX = mDxBoard + mChessRadius;
+            initY = mDxBoard + mChessRadius;
+            x = initX + i*mDxChess + i*2*mChessRadius;
+            y = initY + j*mDxChess + j*2*mChessRadius;
+        } else if(model == 2) {
+            initX = mDxBoard + mDxOneBoard / 2;
+            initY = mDxBoard + mDxOneBoard / 2;
+            x = initX + i * mDxOneBoard;
+            y = initY + j * mDxOneBoard;
+        }
         if (redorblack == 1) {
             paint.setColor(Color.parseColor("#0000ff"));
         }else {
@@ -519,7 +566,15 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
             paint.setColor(Color.parseColor("#000000"));
         }
         paint.setStrokeWidth(5f);
-        canvas.drawText(chess, x-40, y+30, paint);
+        if (model == 1) {
+            canvas.drawText(chess, x-40, y+30, paint);
+        } else if(model == 2) {
+            Rect bounds = new Rect();
+            paint.getTextBounds(chess, 0, chess.length(), bounds);
+            int dy = -(bounds.bottom + bounds.top) / 2;
+            int dx = -(bounds.right + bounds.left) / 2;
+            canvas.drawText(chess, x + dx, y + dy, paint);
+        }
     }
 
     /**
@@ -614,25 +669,30 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
 
     private Point locateXYToMap(float x, float y) {
         //只有棋盘范围的点才转化
-        if(x >= mDxBoard && x <= mWidth - mDxBoard && y >= mDxBoard && y <= mWidth - mDxBoard) {
+        if(x >= mDxBoard && x <= mBoardWidth && y >= mDxBoard && y <= mBoardHeight) {
             Point point = new Point();
             //得到点击位置左上角map中的x，y
             int leftX = (int) ((x - mBoardLeftX) / mDxOneBoard) + 1;
             int leftY = (int) ((y - mBoardLeftY) / mDxOneBoard) + 1;
-            float x1 = (x - mBoardLeftX) % mDxOneBoard;
-            float y1 = (y - mBoardLeftY) % mDxOneBoard;
-            if (x1 <= mDxOneBoard / 2 && y1 <= mDxOneBoard / 2) {
+            if (model == 1) {
+                float x1 = (x - mBoardLeftX) % mDxOneBoard;
+                float y1 = (y - mBoardLeftY) % mDxOneBoard;
+                if (x1 <= mDxOneBoard / 2 && y1 <= mDxOneBoard / 2) {
+                    point.x = leftX;
+                    point.y = leftY;
+                } else if (x1 > mDxOneBoard / 2 && y1 <= mDxOneBoard / 2) {
+                    point.x = leftX + 1;
+                    point.y= leftY;
+                } else if(x1 <= mDxOneBoard / 2 && y1 > mDxOneBoard / 2) {
+                    point.x = leftX;
+                    point.y = leftY + 1;
+                } else if(x1 > mDxOneBoard / 2 && y1 > mDxOneBoard / 2) {
+                    point.x = leftX + 1;
+                    point.y = leftY + 1;
+                }
+            } else if(model == 2) {
                 point.x = leftX;
                 point.y = leftY;
-            } else if (x1 > mDxOneBoard / 2 && y1 <= mDxOneBoard / 2) {
-                point.x = leftX + 1;
-                point.y= leftY;
-            } else if(x1 <= mDxOneBoard / 2 && y1 > mDxOneBoard / 2) {
-                point.x = leftX;
-                point.y = leftY + 1;
-            } else if(x1 > mDxOneBoard / 2 && y1 > mDxOneBoard / 2) {
-                point.x = leftX + 1;
-                point.y = leftY + 1;
             }
             return point;
         }else {
@@ -663,11 +723,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
                 //如果抬起时，还在一个棋子的范围，就执行onClick方法
                 Point point = locateXYToMap(mDownPoint.x, mDownPoint.y);
                 if (point != null) {
-                    float initX = mDxBoard + mChessRadius;
-                    float initY = mDxBoard + mChessRadius;
-                    float x1 = initX + (point.x - 1) * mDxChess + (point.x - 1) * 2 * mChessRadius;
-                    float y1 = initY + (point.y - 1) * mDxChess + (point.y - 1) * 2 * mChessRadius;
-                    if (Math.abs(x1 - motionEvent.getX()) <mChessRadius && Math.abs(y1 - motionEvent.getY()) <mChessRadius) {
+                    if(isInOneChessWhenUp(point, motionEvent)) {
                         onClick(point.x, point.y);
                     }
                 }
@@ -679,36 +735,72 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
         return true;
     }
 
+    /**
+     * 判断手抬起的时候是否和按钮时在一个棋子范围内
+     * @param point 按下时的point
+     * @param motionEvent 抬起时的事件
+     * @return
+     */
+    private boolean isInOneChessWhenUp(Point point, MotionEvent motionEvent) {
+        if (model == 1) {
+            float initX = mDxBoard + mChessRadius;
+            float initY = mDxBoard + mChessRadius;
+            float x1 = initX + (point.x - 1) * mDxChess + (point.x - 1) * 2 * mChessRadius;
+            float y1 = initY + (point.y - 1) * mDxChess + (point.y - 1) * 2 * mChessRadius;
+            if (Math.abs(x1 - motionEvent.getX()) <mChessRadius && Math.abs(y1 - motionEvent.getY()) <mChessRadius) {
+                return true;
+            }
+        } else if(model == 2){
+            int x = (int) ((motionEvent.getX() - mBoardLeftX) / mDxOneBoard) + 1;
+            int y = (int) ((motionEvent.getY() - mBoardLeftY) / mDxOneBoard) + 1;
+            if(x == point.x && y == point.y) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void onClick(int x, int y) {
         if (canSelect) {
             if (select == null) {
-                //如果是第一次点击，就把第一次点击的牌属于哪一方设置给此值
-                if (mClient.getUser().whichSide == 0) {
-                    if (Math.abs(mClient.mGame.getMap()[y - 1][x - 1]) / 100 == 1) {
-                        mClient.getUser().whichSide = 1;
-                        mGameViewListener.onOtherWhichSide(2);
+                if (model == 1) {
+                    //如果是第一次点击，就把第一次点击的牌属于哪一方设置给此值
+                    if (mClient.getUser().whichSide == 0) {
+                        if (Math.abs(mClient.mGame.getMap()[y - 1][x - 1]) / 100 == 1) {
+                            mClient.getUser().whichSide = 1;
+                            mGameViewListener.onOtherWhichSide(2);
+                        }else {
+                            mClient.getUser().whichSide = 2;
+                            mGameViewListener.onOtherWhichSide(1);
+                        }
+                    }
+                    //如果点击的是没有翻开的牌，则调用翻牌的回调
+                    if (mClient.mGame.getMap()[y-1][x-1] < 0) {
+                        //这个x，y是要传递给服务器的，对应map中的x,y就是正好相反的
+                        mGameViewListener.onSelect(y - 1, x - 1);
                     }else {
-                        mClient.getUser().whichSide = 2;
-                        mGameViewListener.onOtherWhichSide(1);
+                        //如果点击的棋子和第一次点击的一致，说明是自己的棋子，就可以点击
+                        if (mClient.getUser().whichSide == mClient.mGame.getMap()[y - 1][x - 1] / 100) {
+                            //这个不用相反，是因为这个用来在横纵坐标上显示的
+                            select = new Point(x, y);
+                        }
                     }
-                }
-                //如果点击的是没有翻开的牌，则调用翻牌的回调
-                if (mClient.mGame.getMap()[y-1][x-1] < 0) {
-                    //这个x，y是要传递给服务器的，对应map中的x,y就是正好相反的
-                    mGameViewListener.onSelect(y - 1, x - 1);
-                }else {
-                    //如果点击的棋子和第一次点击的一致，说明是自己的棋子，就可以点击
-                    if (mClient.getUser().whichSide == mClient.mGame.getMap()[y - 1][x - 1] / 100) {
-                        //这个不用相反，是因为这个用来在横纵坐标上显示的
-                        select = new Point(x, y);
-                    }
+                } else if (model == 2){
+                    select = new Point(x, y);
                 }
             }else {
-                //如果这次点击的是自己这一边的棋牌，则把选择放到这个牌上，否则按照走棋的逻辑走
-                if(mClient.mGame.getMap()[y-1][x-1] / 100 == mClient.getUser().whichSide) {//只要再次点击的是自己这边的就把选择的牌换为当前选择牌
-                    select.x = x;
-                    select.y = y;
-                }else {
+                if (model == 1) {
+                    //如果这次点击的是自己这一边的棋牌，则把选择放到这个牌上，否则按照走棋的逻辑走
+                    if(mClient.mGame.getMap()[y-1][x-1] / 100 == mClient.getUser().whichSide) {//只要再次点击的是自己这边的就把选择的牌换为当前选择牌
+                        select.x = x;
+                        select.y = y;
+                    }else {
+                        Walk walk = new Walk(select.y - 1, select.x - 1, y - 1, x - 1);
+                        mGameViewListener.walk(walk);
+                        select = null;
+                        canSelect = false;
+                    }
+                } else if (model == 2) {
                     Walk walk = new Walk(select.y - 1, select.x - 1, y - 1, x - 1);
                     mGameViewListener.walk(walk);
                     select = null;

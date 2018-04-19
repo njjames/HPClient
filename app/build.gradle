@@ -6,8 +6,8 @@ android {
         applicationId "com.nj.hpclient"
         minSdkVersion 15
         targetSdkVersion 26
-        versionCode 9
-        versionName "2.3.1"
+        versionCode 13
+        versionName "3.0.3"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

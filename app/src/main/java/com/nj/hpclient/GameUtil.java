@@ -1,6 +1,9 @@
 package com.nj.hpclient;
 
+import android.util.Log;
+
 public class GameUtil {
+	private static final String TAG = "GameUtil";
 	public static final int ELEPHANT = 8, LION = 7, TIGER = 6, LEOPARD = 5, WOLF = 4, DOG = 3, CAT = 2, MOUSE = 1;
 
 	// 默认地图（棋盘），什么都没有
@@ -10,6 +13,18 @@ public class GameUtil {
 			{ 0, 0, 0, 0 }, 
 			{ 0, 0, 0, 0 }
 			};
+
+	public static final int[][] DEFAULT_MAP_MODEL2 = {
+			{ 107, 0, 0, 0, 0, 0, 106 },
+			{ 0, 103, 0, 0, 0, 102, 0 },
+			{ 101, 0, 105, 0, 104, 0, 108 },
+			{ 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0 },
+			{ 208, 0, 204, 0, 205, 0, 201 },
+			{ 0, 202, 0, 0, 0, 203, 0 },
+			{ 206, 0, 0, 0, 0, 0, 207 }
+	};
 
 	public static int[][] cloneMap(int[][] map) {
 		int[][] m = new int[map.length][];
@@ -75,13 +90,25 @@ public class GameUtil {
 	}
 
 	public static int[][] mapFromString(String data) {
-		int[][] map = new int[4][4];
 		String[] split = data.split(",");
-		for (int i = 0; i < 4; i++) {
-			for (int j = 0; j < 4; j++) {
-				map[i][j] = Integer.parseInt(split[i * 4 + j]);
+		Log.d(TAG, "split: " + split.length);
+		if (split.length == 16) {
+			int[][] map = new int[4][4];
+			for (int i = 0; i < 4; i++) {
+                for (int j = 0; j < 4; j++) {
+                    map[i][j] = Integer.parseInt(split[i * 4 + j]);
+                }
+            }
+			return map;
+		} else if(split.length == 63){
+			int[][] map = new int[9][7];
+			for (int i = 0; i < 9; i++) {
+				for (int j = 0; j < 7; j++) {
+					map[i][j] = Integer.parseInt(split[i * 7 + j]);
+				}
 			}
+			return map;
 		}
-		return map;
+		return null;
 	}
 }

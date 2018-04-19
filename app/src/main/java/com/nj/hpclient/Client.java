@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -22,6 +23,7 @@ import java.util.concurrent.Executors;
  */
 
 public class Client implements Runnable {
+    private static final String TAG = "Client";
     private static final int ON_CONNECT = 3;
     private static final int ON_DELINE = 4;
     private static final int ON_CONNECT_FAILED = 10;
@@ -267,6 +269,7 @@ public class Client implements Runnable {
      */
     private void receiveGameData(String content) {
         try {
+            Log.d(TAG, "receiveGameData: " + content);
             mGame.setData(content);
         } catch (Exception e) {
             e.printStackTrace();
