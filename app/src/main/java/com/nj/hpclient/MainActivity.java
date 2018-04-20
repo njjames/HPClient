@@ -9,10 +9,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
@@ -21,7 +21,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,7 +32,6 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Formatter;
 
 public class MainActivity extends AppCompatActivity {
     public static final int GAME_VIEW = 1;
@@ -41,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
     public static final int SIGN_VIEW = 3;
     public static final int MENU_VIEW = 4;
     public static final int START_VIEW = 5;
+    private static final int ON_BEGIN_GAME = 6;
+    private static final int ON_CONNECT_GAME = 0;
     private Client mClient;
 
     private MyClientListener mClientListener;
@@ -53,9 +53,19 @@ public class MainActivity extends AppCompatActivity {
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            mIp = SPUtil.getString(MainActivity.this, "ip", "192.168.16.122");
-            mClient = new Client(mIp, 9898, mClientListener);
-            mClient.connect();
+            switch (msg.what) {
+                case ON_CONNECT_GAME:
+                    mIp = SPUtil.getString(MainActivity.this, "ip", "192.168.16.122");
+                    mClient = new Client(mIp, 9898, mClientListener);
+                    mClient.connect();
+                    break;
+                case ON_BEGIN_GAME:
+                    if (mVsDialog != null) {
+                        mVsDialog.dismiss();
+                        gameView();
+                    }
+                    break;
+            }
         }
     };
     private User mLocalUser;
@@ -103,6 +113,13 @@ public class MainActivity extends AppCompatActivity {
     private int mCurrentModel = 0;
     private Button mBtnSetting;
     private AlertDialog mSettingDialog;
+    private AlertDialog mVsDialog;
+    private int mVsShowTime;
+    private int mVsColorRed;
+    private VSView mVs1;
+    private VSView mVs2;
+    private VSView mVsV;
+    private VSView mVsS;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                mHandler.sendEmptyMessage(0);
+                mHandler.sendEmptyMessage(ON_CONNECT_GAME);
             }
         }).start();
     }
@@ -195,7 +212,9 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onStart() {
-            gameView();
+            mGameView = new GameView(MainActivity.this, mClient, mCurrentModel, mGameViewListener);
+            showVSDialog();
+//            gameView();
         }
 
         @Override
@@ -279,6 +298,73 @@ public class MainActivity extends AppCompatActivity {
                 mDownloadProgressDialog.setProgress((int) (progress * 1.0f / fileSize * 100));
             }
         }
+    }
+
+    private void showVSDialog() {
+        if (mVsDialog == null) {
+            mVsShowTime = 3000;
+            mVsColorRed = Color.RED;
+            LayoutInflater layoutInflater = LayoutInflater.from(this);
+            View vsView = layoutInflater.inflate(R.layout.dialog_vs, null);
+            mVs1 = vsView.findViewById(R.id.vs_name1);
+            mVs2 = vsView.findViewById(R.id.vs_name2);
+            mVsV = vsView.findViewById(R.id.vs_nameV);
+            mVsS = vsView.findViewById(R.id.vs_nameS);
+            mVsDialog = new AlertDialog.Builder(this)
+                    .setView(vsView)
+                    .setCancelable(false)
+                    .create();
+        }
+        mVsDialog.show();
+        mVs1.setName(mClient.getUser().getName());
+        mVs1.settime(mVsShowTime);
+        mVs1.setTextSize(100);
+        mVs1.setColor(mVsColorRed);
+        mVs1.setStrokeWidth(5);
+        mVs1.setTextSkewX(-0.3f);
+        mVs1.initPaint();
+        mVs1.initTextPath();
+        mVs1.isRight(true);
+        mVs2.setName(mClient.mGame.getOtherUser(mClient.getUser()).getName());
+        mVs2.settime(mVsShowTime);
+        mVs2.setTextSize(100);
+        mVs2.setColor(mVsColorRed);
+        mVs2.setStrokeWidth(5);
+        mVs2.setTextSkewX(-0.3f);
+        mVs2.initPaint();
+        mVs2.initTextPath();
+        mVsV.setName("V");
+        mVsV.settime(mVsShowTime);
+        mVsV.setTextSize(200);
+        mVsV.setColor(mVsColorRed);
+        mVsV.setStrokeWidth(5);
+        mVsV.setTextSkewX(-0.3f);
+        mVsV.initPaint();
+        mVsV.initTextPath();
+        mVsV.isRight(true);
+        mVsS.setName("S");
+        mVsS.settime(mVsShowTime);
+        mVsS.setTextSize(200);
+        mVsS.setColor(mVsColorRed);
+        mVsS.setStrokeWidth(5);
+        mVsS.setTextSkewX(-0.3f);
+        mVsS.initPaint();
+        mVsS.initTextPath();
+        mVs1.start();
+        mVs2.start();
+        mVsV.start();
+        mVsS.start();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(mVsShowTime + 1000);
+                    mHandler.sendEmptyMessage(ON_BEGIN_GAME);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     private void installApkFile() {
@@ -696,7 +782,7 @@ public class MainActivity extends AppCompatActivity {
     private void gameView() {
         if (thisView != GAME_VIEW) {
             thisView = GAME_VIEW;
-            mGameView = new GameView(this, mClient, mCurrentModel, mGameViewListener);
+//            mGameView = new GameView(this, mClient, mCurrentModel, mGameViewListener);
             setContentView(mGameView);
         }
     }
