@@ -298,6 +298,18 @@ public class MainActivity extends AppCompatActivity {
                 mDownloadProgressDialog.setProgress((int) (progress * 1.0f / fileSize * 100));
             }
         }
+
+        @Override
+        public void onSound(int sound) {
+            switch (sound) {
+                case 1:
+                    Mp3.eatLand.start();
+                    break;
+                case 2:
+                    Mp3.walkLand.start();
+                    break;
+            }
+        }
     }
 
     private void showVSDialog() {

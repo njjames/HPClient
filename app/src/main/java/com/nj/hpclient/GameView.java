@@ -1,8 +1,10 @@
 package com.nj.hpclient;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.Path;
@@ -15,8 +17,6 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-
-import java.util.logging.Level;
 
 /**
  * Created by Administrator on 2018-03-31.
@@ -50,6 +50,36 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
     private float mBoardHeight;
     private float mBoardWidth;
     private float mUsernameHeight;
+    private Bitmap mBElephant;
+    private Bitmap mBLion;
+    private Bitmap mBtiger;
+    private Bitmap mRmouse;
+    private Bitmap mBleopard;
+    private Bitmap mBwolf;
+    private Bitmap mBdog;
+    private Bitmap mBcat;
+    private Bitmap mBmouse;
+    private Bitmap mRLion;
+    private Bitmap mRtiger;
+    private Bitmap mRleopard;
+    private Bitmap mRwold;
+    private Bitmap mRdog;
+    private Bitmap mRcat;
+    private Bitmap mSelectBLion;
+    private Bitmap mSelectBtiger;
+    private Bitmap mSelectBleopard;
+    private Bitmap mSelectBwold;
+    private Bitmap mSelectBdog;
+    private Bitmap mSelectBcat;
+    private Bitmap mSelectBmouse;
+    private Bitmap mSelectRLion;
+    private Bitmap mSelectRtiger;
+    private Bitmap mSelectRleopard;
+    private Bitmap mSelectRwold;
+    private Bitmap mSelectRdog;
+    private Bitmap mSelectRcat;
+    private Bitmap mSelectRmouse;
+    private Bitmap mRElephant;
     //    //判断是那一边的，初始值是0，第一次点击翻开的是哪一方就是哪一方
 //    private int witchSide = 0;
 
@@ -114,6 +144,45 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
             mBoardLeftY = mDxBoard;
             mUsernameHeight = mBoardHeight + mDxBoard + 80;
         }
+        float sw = mChessRadius * 2 / Img.BELEPHANT.getWidth();
+        float sw_select = mChessRadius * 2 / Img.SELECT_BELEPHANT.getWidth();
+        mBElephant = scaleBitmap(Img.BELEPHANT, sw);
+        mBLion = scaleBitmap(Img.BLION, sw);
+        mBtiger = scaleBitmap(Img.BTIGER, sw);
+        mBleopard = scaleBitmap(Img.BLEOPARD, sw);
+        mBwolf = scaleBitmap(Img.BWOLF, sw);
+        mBdog = scaleBitmap(Img.BDOG, sw);
+        mBcat = scaleBitmap(Img.BCAT, sw);
+        mBmouse = scaleBitmap(Img.BMOUSE, sw);
+        mRElephant = scaleBitmap(Img.RELEPHANT, sw);
+        mRLion = scaleBitmap(Img.RLION, sw);
+        mRtiger = scaleBitmap(Img.RTIGER, sw);
+        mRleopard = scaleBitmap(Img.RLEOPARD, sw);
+        mRwold = scaleBitmap(Img.RWOLF, sw);
+        mRdog = scaleBitmap(Img.RDOG, sw);
+        mRcat = scaleBitmap(Img.RCAT, sw);
+        mRmouse = scaleBitmap(Img.RMOUSE, sw);
+
+        mSelectBLion = scaleBitmap(Img.SELECT_BLION, sw_select);
+        mSelectBtiger = scaleBitmap(Img.SELECT_BTIGER, sw_select);
+        mSelectBleopard = scaleBitmap(Img.SELECT_BLEOPARD, sw_select);
+        mSelectBwold = scaleBitmap(Img.SELECT_BWOLF, sw_select);
+        mSelectBdog = scaleBitmap(Img.SELECT_BDOG, sw_select);
+        mSelectBcat = scaleBitmap(Img.SELECT_BCAT, sw_select);
+        mSelectBmouse = scaleBitmap(Img.SELECT_BMOUSE, sw_select);
+        mSelectRLion = scaleBitmap(Img.SELECT_RLION, sw_select);
+        mSelectRtiger = scaleBitmap(Img.SELECT_RTIGER, sw_select);
+        mSelectRleopard = scaleBitmap(Img.SELECT_RLEOPARD, sw_select);
+        mSelectRwold = scaleBitmap(Img.SELECT_RWOLF, sw_select);
+        mSelectRdog = scaleBitmap(Img.SELECT_RDOG, sw_select);
+        mSelectRcat = scaleBitmap(Img.SELECT_RCAT, sw_select);
+        mSelectRmouse = scaleBitmap(Img.SELECT_RMOUSE, sw_select);
+    }
+
+    private Bitmap scaleBitmap(Bitmap bitmap, float sw) {
+        Matrix matrix = new Matrix();
+        matrix.postScale(sw, sw);
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
     }
 
     @Override
@@ -394,59 +463,79 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
                 paint.setTextSize(80f);
                 for (int i = 0; i < 4; i++) {
                     for (int j = 0; j < 4; j++) {
+                        Bitmap chessImg = null;
                         //小于0.说明是没有翻开的牌
                         if (map[i][j] < 0) {
                             drawChessBG(j, i, canvas, paint);
                         }
                         switch (map[i][j]) {
                             case 101:
-                                drawOneChess("鼠", j, i, canvas, paint, 1);
+                                chessImg = mBmouse;
+//                                drawOneChess("鼠", j, i, canvas, paint, 1);
                                 break;
                             case 102:
-                                drawOneChess("猫", j, i, canvas, paint, 1);
+                                chessImg = mBcat;
+//                                drawOneChess("猫", j, i, canvas, paint, 1);
                                 break;
                             case 103:
-                                drawOneChess("狗", j, i, canvas, paint, 1);
+                                chessImg = mBdog;
+//                                drawOneChess("狗", j, i, canvas, paint, 1);
                                 break;
                             case 104:
-                                drawOneChess("狼", j, i, canvas, paint, 1);
+                                chessImg = mBwolf;
+//                                drawOneChess("狼", j, i, canvas, paint, 1);
                                 break;
                             case 105:
-                                drawOneChess("豹", j, i, canvas, paint, 1);
+                                chessImg = mBleopard;
+//                                drawOneChess("豹", j, i, canvas, paint, 1);
                                 break;
                             case 106:
-                                drawOneChess("虎", j, i, canvas, paint, 1);
+                                chessImg = mBtiger;
+//                                drawOneChess("虎", j, i, canvas, paint, 1);
                                 break;
                             case 107:
-                                drawOneChess("狮", j, i, canvas, paint, 1);
+                                chessImg = mBLion;
+//                                drawOneChess("狮", j, i, canvas, paint, 1);
                                 break;
                             case 108:
-                                drawOneChess("象", j, i, canvas, paint, 1);
+                                chessImg = mBElephant;
+//                                drawOneChess("象", j, i, canvas, paint, 1);
                                 break;
                             case 201:
-                                drawOneChess("鼠", j, i, canvas, paint, 2);
+                                chessImg = mRmouse;
+//                                drawOneChess("鼠", j, i, canvas, paint, 2);
                                 break;
                             case 202:
-                                drawOneChess("猫", j, i, canvas, paint, 2);
+                                chessImg = mRcat;
+//                                drawOneChess("猫", j, i, canvas, paint, 2);
                                 break;
                             case 203:
-                                drawOneChess("狗", j, i, canvas, paint, 2);
+                                chessImg = mRdog;
+//                                drawOneChess("狗", j, i, canvas, paint, 2);
                                 break;
                             case 204:
-                                drawOneChess("狼", j, i, canvas, paint, 2);
+                                chessImg = mRdog;
+//                                drawOneChess("狼", j, i, canvas, paint, 2);
                                 break;
                             case 205:
-                                drawOneChess("豹", j, i, canvas, paint, 2);
+                                chessImg = mRleopard;
+//                                drawOneChess("豹", j, i, canvas, paint, 2);
                                 break;
                             case 206:
-                                drawOneChess("虎", j, i, canvas, paint, 2);
+                                chessImg = mRtiger;
+//                                drawOneChess("虎", j, i, canvas, paint, 2);
                                 break;
                             case 207:
-                                drawOneChess("狮", j, i, canvas, paint, 2);
+                                chessImg = mRLion;
+//                                drawOneChess("狮", j, i, canvas, paint, 2);
                                 break;
                             case 208:
-                                drawOneChess("象", j, i, canvas, paint, 2);
+                                chessImg = mRElephant;
+//                                drawOneChess("象", j, i, canvas, paint, 2);
                                 break;
+                        }
+                        if (chessImg != null) {
+//                            canvas.drawBitmap(chessImg, chessWidth * j, oy+ chessWidth * i, paint);
                         }
                     }
                 }
@@ -778,6 +867,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
                     if (mClient.mGame.getMap()[y-1][x-1] < 0) {
                         //这个x，y是要传递给服务器的，对应map中的x,y就是正好相反的
                         mGameViewListener.onSelect(y - 1, x - 1);
+                        startAnimalSound(Math.abs(mClient.mGame.getMap()[y-1][x-1]) % 100);
                     }else {
                         //如果点击的棋子和第一次点击的一致，说明是自己的棋子，就可以点击
                         if (mClient.getUser().whichSide == mClient.mGame.getMap()[y - 1][x - 1] / 100) {
@@ -786,7 +876,12 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
                         }
                     }
                 } else if (model == 2){
-                    select = new Point(x, y);
+                    if (mClient.mGame.getMap()[y - 1][x - 1] != 0) {
+                        select = new Point(x, y);
+                    }
+                }
+                if (select != null) {
+                    startAnimalSound(mClient.mGame.getMap()[y - 1][x - 1] % 100);
                 }
             }else {
                 if (model == 1) {
@@ -794,6 +889,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
                     if(mClient.mGame.getMap()[y-1][x-1] / 100 == mClient.getUser().whichSide) {//只要再次点击的是自己这边的就把选择的牌换为当前选择牌
                         select.x = x;
                         select.y = y;
+                        startAnimalSound(mClient.mGame.getMap()[y - 1][x - 1] % 100);
                     }else {
                         Walk walk = new Walk(select.y - 1, select.x - 1, y - 1, x - 1);
                         mGameViewListener.walk(walk);
@@ -801,12 +897,48 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
                         canSelect = false;
                     }
                 } else if (model == 2) {
-                    Walk walk = new Walk(select.y - 1, select.x - 1, y - 1, x - 1);
-                    mGameViewListener.walk(walk);
-                    select = null;
-                    canSelect = false;
+                    if(mClient.mGame.getMap()[y-1][x-1] / 100 == mClient.mGame.getMap()[select.y-1][select.x-1] / 100) {
+                        select.x = x;
+                        select.y = y;
+                        startAnimalSound(mClient.mGame.getMap()[y - 1][x - 1] % 100);
+                    }else {
+                        Walk walk = new Walk(select.y - 1, select.x - 1, y - 1, x - 1);
+                        mGameViewListener.walk(walk);
+                        select = null;
+                        canSelect = false;
+                    }
                 }
             }
+        }
+    }
+
+    private void startAnimalSound(int annimal) {
+        switch (annimal) {
+            case 8:
+                Mp3.elephant.start();
+                break;
+            case 7:
+                Mp3.lion.start();
+                break;
+            case 6:
+                Mp3.tigger.start();
+                break;
+            case 5:
+                Mp3.leopard.start();
+                break;
+            case 4:
+                Mp3.wolf.start();
+                break;
+            case 3:
+                Mp3.dog.start();
+                break;
+            case 2:
+                Mp3.cat.start();
+                break;
+            case 1:
+                Mp3.mouse.start();
+                break;
+
         }
     }
 

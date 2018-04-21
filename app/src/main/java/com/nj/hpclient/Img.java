@@ -8,21 +8,41 @@ public class Img {
 	public static Bitmap BG;
 	public static Bitmap BOARD;
 	public static Bitmap OOS;
-	public static Bitmap BA;
-	public static Bitmap BB;
-	public static Bitmap BC;
-	public static Bitmap BK;
-	public static Bitmap BN;
-	public static Bitmap BP;
-	public static Bitmap BR;
+	public static Bitmap BELEPHANT;
+	public static Bitmap BLION;
+	public static Bitmap BTIGER;
+	public static Bitmap BLEOPARD;
+	public static Bitmap BWOLF;
+	public static Bitmap BDOG;
+	public static Bitmap BCAT;
+	public static Bitmap BMOUSE;
 
-	public static Bitmap RA;
-	public static Bitmap RB;
-	public static Bitmap RC;
-	public static Bitmap RK;
-	public static Bitmap RN;
-	public static Bitmap RP;
-	public static Bitmap RR;
+	public static Bitmap RELEPHANT;
+	public static Bitmap RLION;
+	public static Bitmap RTIGER;
+	public static Bitmap RLEOPARD;
+	public static Bitmap RWOLF;
+	public static Bitmap RDOG;
+	public static Bitmap RCAT;
+	public static Bitmap RMOUSE;
+
+	public static Bitmap SELECT_BELEPHANT;
+	public static Bitmap SELECT_BLION;
+	public static Bitmap SELECT_BTIGER;
+	public static Bitmap SELECT_BLEOPARD;
+	public static Bitmap SELECT_BWOLF;
+	public static Bitmap SELECT_BDOG;
+	public static Bitmap SELECT_BCAT;
+	public static Bitmap SELECT_BMOUSE;
+
+	public static Bitmap SELECT_RELEPHANT;
+	public static Bitmap SELECT_RLION;
+	public static Bitmap SELECT_RTIGER;
+	public static Bitmap SELECT_RLEOPARD;
+	public static Bitmap SELECT_RWOLF;
+	public static Bitmap SELECT_RDOG;
+	public static Bitmap SELECT_RCAT;
+	public static Bitmap SELECT_RMOUSE;
 
 	public static Bitmap HEAD1;
 	public static Bitmap HEAD2;
@@ -40,43 +60,47 @@ public class Img {
 	public static Bitmap HEAD14;
 
 	public static void init(Context context) {
-		//		BG = BitmapFactory
-		//				.decodeResource(context.getResources(), R.drawable.bg);
-		//
-		//		BOARD = BitmapFactory.decodeResource(context.getResources(),
-		//				R.drawable.board);
-		//		OOS = BitmapFactory.decodeResource(context.getResources(),
-		//				R.drawable.oos);
+//		BG = BitmapFactory
+//				.decodeResource(context.getResources(), R.drawable.bg);
+//
+//		BOARD = BitmapFactory.decodeResource(context.getResources(),
+//				R.drawable.board);
+//		OOS = BitmapFactory.decodeResource(context.getResources(),
+//				R.drawable.oos);
 
-		//		BA = BitmapFactory
-		//				.decodeResource(context.getResources(), R.drawable.ba);
-		//		BB = BitmapFactory
-		//				.decodeResource(context.getResources(), R.drawable.bb);
-		//		BC = BitmapFactory
-		//				.decodeResource(context.getResources(), R.drawable.bc);
-		//		BK = BitmapFactory
-		//				.decodeResource(context.getResources(), R.drawable.bk);
-		//		BN = BitmapFactory
-		//				.decodeResource(context.getResources(), R.drawable.bn);
-		//		BP = BitmapFactory
-		//				.decodeResource(context.getResources(), R.drawable.bp);
-		//		BR = BitmapFactory
-		//				.decodeResource(context.getResources(), R.drawable.br);
-		//
-		//		RA = BitmapFactory
-		//				.decodeResource(context.getResources(), R.drawable.ra);
-		//		RB = BitmapFactory
-		//				.decodeResource(context.getResources(), R.drawable.rb);
-		//		RC = BitmapFactory
-		//				.decodeResource(context.getResources(), R.drawable.rc);
-		//		RK = BitmapFactory
-		//				.decodeResource(context.getResources(), R.drawable.rk);
-		//		RN = BitmapFactory
-		//				.decodeResource(context.getResources(), R.drawable.rn);
-		//		RP = BitmapFactory
-		//				.decodeResource(context.getResources(), R.drawable.rp);
-		//		RR = BitmapFactory
-		//				.decodeResource(context.getResources(), R.drawable.rr);
+		BELEPHANT = BitmapFactory.decodeResource(context.getResources(), R.drawable.elephant_b);
+		BLION = BitmapFactory.decodeResource(context.getResources(), R.drawable.lion_b);
+		BTIGER = BitmapFactory.decodeResource(context.getResources(), R.drawable.tiger_b);
+		BLEOPARD = BitmapFactory.decodeResource(context.getResources(), R.drawable.leopard_b);
+		BWOLF = BitmapFactory.decodeResource(context.getResources(), R.drawable.wolf_b);
+		BDOG = BitmapFactory.decodeResource(context.getResources(), R.drawable.dog_b);
+		BCAT = BitmapFactory.decodeResource(context.getResources(), R.drawable.cat_b);
+		BMOUSE = BitmapFactory.decodeResource(context.getResources(), R.drawable.mouse_b);
+		RELEPHANT = BitmapFactory.decodeResource(context.getResources(), R.drawable.elephant_r);
+		RLION = BitmapFactory.decodeResource(context.getResources(), R.drawable.lion_r);
+		RTIGER = BitmapFactory.decodeResource(context.getResources(), R.drawable.tiger_r);
+		RLEOPARD = BitmapFactory.decodeResource(context.getResources(), R.drawable.leopard_r);
+		RWOLF = BitmapFactory.decodeResource(context.getResources(), R.drawable.wolf_r);
+		RDOG = BitmapFactory.decodeResource(context.getResources(), R.drawable.dog_r);
+		RCAT = BitmapFactory.decodeResource(context.getResources(), R.drawable.cat_r);
+		RMOUSE = BitmapFactory.decodeResource(context.getResources(), R.drawable.mouse_r);
+
+		SELECT_BELEPHANT = BitmapFactory.decodeResource(context.getResources(), R.drawable.elephant_b_select);
+		SELECT_BLION = BitmapFactory.decodeResource(context.getResources(), R.drawable.lion_b_select);
+		SELECT_BTIGER = BitmapFactory.decodeResource(context.getResources(), R.drawable.tiger_b_select);
+		SELECT_BLEOPARD = BitmapFactory.decodeResource(context.getResources(), R.drawable.leopard_b_select);
+		SELECT_BWOLF = BitmapFactory.decodeResource(context.getResources(), R.drawable.wolf_b_select);
+		SELECT_BDOG = BitmapFactory.decodeResource(context.getResources(), R.drawable.dog_b_select);
+		SELECT_BCAT = BitmapFactory.decodeResource(context.getResources(), R.drawable.cat_b_select);
+		SELECT_BMOUSE = BitmapFactory.decodeResource(context.getResources(), R.drawable.mouse_b_select);
+		SELECT_RELEPHANT = BitmapFactory.decodeResource(context.getResources(), R.drawable.elephant_r_select);
+		SELECT_RLION = BitmapFactory.decodeResource(context.getResources(), R.drawable.lion_r_select);
+		SELECT_RTIGER = BitmapFactory.decodeResource(context.getResources(), R.drawable.tiger_r_select);
+		SELECT_RLEOPARD = BitmapFactory.decodeResource(context.getResources(), R.drawable.leopard_r_select);
+		SELECT_RWOLF = BitmapFactory.decodeResource(context.getResources(), R.drawable.wolf_r_select);
+		SELECT_RDOG = BitmapFactory.decodeResource(context.getResources(), R.drawable.dog_r_select);
+		SELECT_RCAT = BitmapFactory.decodeResource(context.getResources(), R.drawable.cat_r_select);
+		SELECT_RMOUSE = BitmapFactory.decodeResource(context.getResources(), R.drawable.mouse_r_select);
 
 		HEAD1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.head1);
 		HEAD2 = BitmapFactory.decodeResource(context.getResources(), R.drawable.head2);

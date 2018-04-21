@@ -37,6 +37,7 @@ public class Client implements Runnable {
     private static final int ON_NEWVERSION = 14;
     private static final int ON_INSTALL = 15;
     private static final int ON_DOWNLOADPROGRESS = 16;
+    private static final int ON_SOUND = 17;
 
     private String ip;
     private int port;
@@ -97,6 +98,10 @@ public class Client implements Runnable {
                 case ON_DOWNLOADPROGRESS:
                     int progress = (int) msg.obj;
                     mClientListener.onProgress(progress);
+                    break;
+                case ON_SOUND:
+                    int sound = Integer.parseInt((String) msg.obj);
+                    mClientListener.onSound(sound);
                     break;
             }
         }
@@ -169,11 +174,21 @@ public class Client implements Runnable {
                         mDowloading = true;
                         receiveNewAPK();
                         break;
+                    case "sound":
+                        receiveSound(content);
+                        break;
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void receiveSound(String content) {
+        Message msg = Message.obtain();
+        msg.obj = content;
+        msg.what = ON_SOUND;
+        mHandler.sendMessage(msg);
     }
 
     private void receiveNewAPK() {
@@ -444,5 +459,7 @@ public class Client implements Runnable {
 
         //下载数据时的回调
         public void onProgress(int progress);
+
+        public void onSound(int sound);
     }
 }
