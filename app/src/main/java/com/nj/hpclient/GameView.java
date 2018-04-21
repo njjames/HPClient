@@ -62,24 +62,27 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
     private Bitmap mRLion;
     private Bitmap mRtiger;
     private Bitmap mRleopard;
-    private Bitmap mRwold;
+    private Bitmap mRwolf;
     private Bitmap mRdog;
     private Bitmap mRcat;
     private Bitmap mSelectBLion;
     private Bitmap mSelectBtiger;
     private Bitmap mSelectBleopard;
-    private Bitmap mSelectBwold;
+    private Bitmap mSelectBwolf;
     private Bitmap mSelectBdog;
     private Bitmap mSelectBcat;
     private Bitmap mSelectBmouse;
     private Bitmap mSelectRLion;
     private Bitmap mSelectRtiger;
     private Bitmap mSelectRleopard;
-    private Bitmap mSelectRwold;
+    private Bitmap mSelectRwolf;
     private Bitmap mSelectRdog;
     private Bitmap mSelectRcat;
     private Bitmap mSelectRmouse;
     private Bitmap mRElephant;
+    private Bitmap mSelectBElephant;
+    private Bitmap mSelectRElephant;
+    private boolean mIsPicModel;
     //    //判断是那一边的，初始值是0，第一次点击翻开的是哪一方就是哪一方
 //    private int witchSide = 0;
 
@@ -96,10 +99,11 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
         init();
     }
 
-    public GameView(Context context, Client client, int model, GameViewListener gameViewListener) {
+    public GameView(Context context, Client client, int model, boolean isPicModel, GameViewListener gameViewListener) {
         this(context);
         this.mClient = client;
         this.model = model;
+        this.mIsPicModel = isPicModel;
         this.mGameViewListener = gameViewListener;
         //必须设置这个，否则不出发点击事件
         this.setOnTouchListener(this);
@@ -144,8 +148,8 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
             mBoardLeftY = mDxBoard;
             mUsernameHeight = mBoardHeight + mDxBoard + 80;
         }
-        float sw = mChessRadius * 2 / Img.BELEPHANT.getWidth();
-        float sw_select = mChessRadius * 2 / Img.SELECT_BELEPHANT.getWidth();
+        float sw = mChessRadius * 2 / Img.BELEPHANT.getHeight();
+        float sw_select = mChessRadius * 2 / Img.SELECT_BELEPHANT.getHeight();
         mBElephant = scaleBitmap(Img.BELEPHANT, sw);
         mBLion = scaleBitmap(Img.BLION, sw);
         mBtiger = scaleBitmap(Img.BTIGER, sw);
@@ -158,25 +162,27 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
         mRLion = scaleBitmap(Img.RLION, sw);
         mRtiger = scaleBitmap(Img.RTIGER, sw);
         mRleopard = scaleBitmap(Img.RLEOPARD, sw);
-        mRwold = scaleBitmap(Img.RWOLF, sw);
+        mRwolf = scaleBitmap(Img.RWOLF, sw);
         mRdog = scaleBitmap(Img.RDOG, sw);
         mRcat = scaleBitmap(Img.RCAT, sw);
         mRmouse = scaleBitmap(Img.RMOUSE, sw);
 
+        mSelectBElephant = scaleBitmap(Img.SELECT_BELEPHANT, sw_select);
         mSelectBLion = scaleBitmap(Img.SELECT_BLION, sw_select);
         mSelectBtiger = scaleBitmap(Img.SELECT_BTIGER, sw_select);
         mSelectBleopard = scaleBitmap(Img.SELECT_BLEOPARD, sw_select);
-        mSelectBwold = scaleBitmap(Img.SELECT_BWOLF, sw_select);
+        mSelectBwolf = scaleBitmap(Img.SELECT_BWOLF, sw_select);
         mSelectBdog = scaleBitmap(Img.SELECT_BDOG, sw_select);
         mSelectBcat = scaleBitmap(Img.SELECT_BCAT, sw_select);
         mSelectBmouse = scaleBitmap(Img.SELECT_BMOUSE, sw_select);
         mSelectRLion = scaleBitmap(Img.SELECT_RLION, sw_select);
         mSelectRtiger = scaleBitmap(Img.SELECT_RTIGER, sw_select);
         mSelectRleopard = scaleBitmap(Img.SELECT_RLEOPARD, sw_select);
-        mSelectRwold = scaleBitmap(Img.SELECT_RWOLF, sw_select);
+        mSelectRwolf = scaleBitmap(Img.SELECT_RWOLF, sw_select);
         mSelectRdog = scaleBitmap(Img.SELECT_RDOG, sw_select);
         mSelectRcat = scaleBitmap(Img.SELECT_RCAT, sw_select);
         mSelectRmouse = scaleBitmap(Img.SELECT_RMOUSE, sw_select);
+        mSelectRElephant = scaleBitmap(Img.SELECT_RELEPHANT, sw_select);
     }
 
     private Bitmap scaleBitmap(Bitmap bitmap, float sw) {
@@ -431,11 +437,68 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
         if (canSelect) {
             if (select != null) {
                 if (model == 1) {
-                    float initX = mDxBoard + mChessRadius;
-                    float initY = mDxBoard + mChessRadius;
-                    float x = initX + (select.x - 1)*mDxChess + (select.x - 1)*2*mChessRadius;
-                    float y = initY + (select.y - 1)*mDxChess + (select.y - 1)*2*mChessRadius;
-                    canvas.drawCircle(x, y, mChessRadius, paint);
+                    if (mIsPicModel) {
+                        Bitmap chessImg = null;
+                        switch (mClient.mGame.getMap()[select.y - 1][select.x - 1]) {
+                            case 101:
+                                chessImg = mSelectBmouse;
+                                break;
+                            case 102:
+                                chessImg = mSelectBcat;
+                                break;
+                            case 103:
+                                chessImg = mSelectBdog;
+                                break;
+                            case 104:
+                                chessImg = mSelectBwolf;
+                                break;
+                            case 105:
+                                chessImg = mSelectBleopard;
+                                break;
+                            case 106:
+                                chessImg = mSelectBtiger;
+                                break;
+                            case 107:
+                                chessImg = mSelectBLion;
+                                break;
+                            case 108:
+                                chessImg = mSelectBElephant;
+                                break;
+                            case 201:
+                                chessImg = mSelectRmouse;
+                                break;
+                            case 202:
+                                chessImg = mSelectRcat;
+                                break;
+                            case 203:
+                                chessImg = mSelectRdog;
+                                break;
+                            case 204:
+                                chessImg = mSelectRwolf;
+                                break;
+                            case 205:
+                                chessImg = mSelectRleopard;
+                                break;
+                            case 206:
+                                chessImg = mSelectRtiger;
+                                break;
+                            case 207:
+                                chessImg = mSelectRLion;
+                                break;
+                            case 208:
+                                chessImg = mSelectRElephant;
+                                break;
+                        }
+                        if (chessImg != null) {
+                            drawOnChessPic(canvas, paint, select.x - 1, select.y - 1, chessImg);
+                        }
+                    } else {
+                        float initX = mDxBoard + mChessRadius;
+                        float initY = mDxBoard + mChessRadius;
+                        float x = initX + (select.x - 1)*mDxChess + (select.x - 1)*2*mChessRadius;
+                        float y = initY + (select.y - 1)*mDxChess + (select.y - 1)*2*mChessRadius;
+                        canvas.drawCircle(x, y, mChessRadius, paint);
+                    }
                 } else if(model == 2) {
                     paint.setColor(Color.parseColor("#cc00ff"));
                     float initX = mDxBoard + mDxOneBoard / 2;
@@ -463,79 +526,143 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
                 paint.setTextSize(80f);
                 for (int i = 0; i < 4; i++) {
                     for (int j = 0; j < 4; j++) {
-                        Bitmap chessImg = null;
-                        //小于0.说明是没有翻开的牌
-                        if (map[i][j] < 0) {
-                            drawChessBG(j, i, canvas, paint);
-                        }
-                        switch (map[i][j]) {
-                            case 101:
-                                chessImg = mBmouse;
-//                                drawOneChess("鼠", j, i, canvas, paint, 1);
-                                break;
-                            case 102:
-                                chessImg = mBcat;
-//                                drawOneChess("猫", j, i, canvas, paint, 1);
-                                break;
-                            case 103:
-                                chessImg = mBdog;
-//                                drawOneChess("狗", j, i, canvas, paint, 1);
-                                break;
-                            case 104:
-                                chessImg = mBwolf;
-//                                drawOneChess("狼", j, i, canvas, paint, 1);
-                                break;
-                            case 105:
-                                chessImg = mBleopard;
-//                                drawOneChess("豹", j, i, canvas, paint, 1);
-                                break;
-                            case 106:
-                                chessImg = mBtiger;
-//                                drawOneChess("虎", j, i, canvas, paint, 1);
-                                break;
-                            case 107:
-                                chessImg = mBLion;
-//                                drawOneChess("狮", j, i, canvas, paint, 1);
-                                break;
-                            case 108:
-                                chessImg = mBElephant;
-//                                drawOneChess("象", j, i, canvas, paint, 1);
-                                break;
-                            case 201:
-                                chessImg = mRmouse;
-//                                drawOneChess("鼠", j, i, canvas, paint, 2);
-                                break;
-                            case 202:
-                                chessImg = mRcat;
-//                                drawOneChess("猫", j, i, canvas, paint, 2);
-                                break;
-                            case 203:
-                                chessImg = mRdog;
-//                                drawOneChess("狗", j, i, canvas, paint, 2);
-                                break;
-                            case 204:
-                                chessImg = mRdog;
-//                                drawOneChess("狼", j, i, canvas, paint, 2);
-                                break;
-                            case 205:
-                                chessImg = mRleopard;
-//                                drawOneChess("豹", j, i, canvas, paint, 2);
-                                break;
-                            case 206:
-                                chessImg = mRtiger;
-//                                drawOneChess("虎", j, i, canvas, paint, 2);
-                                break;
-                            case 207:
-                                chessImg = mRLion;
-//                                drawOneChess("狮", j, i, canvas, paint, 2);
-                                break;
-                            case 208:
-                                chessImg = mRElephant;
-//                                drawOneChess("象", j, i, canvas, paint, 2);
-                                break;
-                        }
-                        if (chessImg != null) {
-//                            canvas.drawBitmap(chessImg, chessWidth * j, oy+ chessWidth * i, paint);
+                        if (mIsPicModel) {
+                            Bitmap chessImg = null;
+                            //小于0.说明是没有翻开的牌
+                            if (map[i][j] < 0) {
+                                drawChessBG(j, i, canvas, paint);
+                            }else if(map[i][j] > 0) {
+                                if (select == null || i != select.y -1 || j != select.x - 1) {
+                                    switch (map[i][j]) {
+                                        case 101:
+                                            chessImg = mBmouse;
+                                            break;
+                                        case 102:
+                                            chessImg = mBcat;
+                                            break;
+                                        case 103:
+                                            chessImg = mBdog;
+                                            break;
+                                        case 104:
+                                            chessImg = mBwolf;
+                                            break;
+                                        case 105:
+                                            chessImg = mBleopard;
+                                            break;
+                                        case 106:
+                                            chessImg = mBtiger;
+                                            break;
+                                        case 107:
+                                            chessImg = mBLion;
+                                            break;
+                                        case 108:
+                                            chessImg = mBElephant;
+                                            break;
+                                        case 201:
+                                            chessImg = mRmouse;
+                                            break;
+                                        case 202:
+                                            chessImg = mRcat;
+                                            break;
+                                        case 203:
+                                            chessImg = mRdog;
+                                            break;
+                                        case 204:
+                                            chessImg = mRwolf;
+                                            break;
+                                        case 205:
+                                            chessImg = mRleopard;
+                                            break;
+                                        case 206:
+                                            chessImg = mRtiger;
+                                            break;
+                                        case 207:
+                                            chessImg = mRLion;
+                                            break;
+                                        case 208:
+                                            chessImg = mRElephant;
+                                            break;
+                                    }
+                                    if (chessImg != null) {
+                                        drawOnChessPic(canvas, paint, j, i, chessImg);
+                                    }
+                                }
+                            }
+                        } else {
+                            String chess = "";
+                            int color = 0;
+                            //小于0.说明是没有翻开的牌
+                            if (map[i][j] < 0) {
+                                drawChessBG(j, i, canvas, paint);
+                            }else if(map[i][j] > 0) {
+                                switch (map[i][j]) {
+                                    case 101:
+                                        chess = "鼠";
+                                        color = 1;
+                                        break;
+                                    case 102:
+                                        chess = "猫";
+                                        color = 1;
+                                        break;
+                                    case 103:
+                                        chess = "狗";
+                                        color = 1;
+                                        break;
+                                    case 104:
+                                        chess = "狼";
+                                        color = 1;
+                                        break;
+                                    case 105:
+                                        chess = "豹";
+                                        color = 1;
+                                        break;
+                                    case 106:
+                                        chess = "虎";
+                                        color = 1;
+                                        break;
+                                    case 107:
+                                        chess = "狮";
+                                        color = 1;
+                                        break;
+                                    case 108:
+                                        chess = "象";
+                                        color = 1;
+                                        break;
+                                    case 201:
+                                        chess = "鼠";
+                                        color = 2;
+                                        break;
+                                    case 202:
+                                        chess = "猫";
+                                        color = 2;
+                                        break;
+                                    case 203:
+                                        chess = "狗";
+                                        color = 2;
+                                        break;
+                                    case 204:
+                                        chess = "狼";
+                                        color = 2;
+                                        break;
+                                    case 205:
+                                        chess = "豹";
+                                        color = 2;
+                                        break;
+                                    case 206:
+                                        chess = "虎";
+                                        color = 2;
+                                        break;
+                                    case 207:
+                                        chess = "狮";
+                                        color = 2;
+                                        break;
+                                    case 208:
+                                        chess = "象";
+                                        color = 2;
+                                        break;
+                                }
+                                drawOneChess(chess, j, i, canvas, paint, color);
+                            }
                         }
                     }
                 }
@@ -598,6 +725,14 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
                 }
             }
         }
+    }
+
+    private void drawOnChessPic(Canvas canvas, Paint paint, int i, int j, Bitmap chessImg) {
+        float initX = mDxBoard + mChessRadius;
+        float initY = mDxBoard;
+        float x = initX + i * mDxChess + i * 2 * mChessRadius - chessImg.getWidth() / 2;
+        float y = initY + j * mDxChess + j * 2 * mChessRadius;
+        canvas.drawBitmap(chessImg, x, y, paint);
     }
 
 
@@ -940,6 +1075,10 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
                 break;
 
         }
+    }
+
+    public void setPicModel(boolean picModel) {
+        this.mIsPicModel = picModel;
     }
 
     public interface GameViewListener {

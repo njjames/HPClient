@@ -120,6 +120,8 @@ public class MainActivity extends AppCompatActivity {
     private VSView mVs2;
     private VSView mVsV;
     private VSView mVsS;
+    private Button mBtnShowModel;
+    private boolean mIsPicModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -129,6 +131,7 @@ public class MainActivity extends AppCompatActivity {
         Img.init(this);
         //初始化音乐
         Mp3.init(this);
+        mIsPicModel = SPUtil.getBoolean(this, "isPicModel", false);
 //        Mp3.bgm.start();
         setContentView(R.layout.layout_start);
         mTvVersion = findViewById(R.id.tv_version);
@@ -212,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onStart() {
-            mGameView = new GameView(MainActivity.this, mClient, mCurrentModel, mGameViewListener);
+            mGameView = new GameView(MainActivity.this, mClient, mCurrentModel, mIsPicModel, mGameViewListener);
             showVSDialog();
 //            gameView();
         }
@@ -738,6 +741,12 @@ public class MainActivity extends AppCompatActivity {
             mBtnAskPeace = view.findViewById(R.id.btn_askPeace);
             mBtnGiveUp = view.findViewById(R.id.btn_giveup);
             mBtnHelp = view.findViewById(R.id.btn_help);
+            mBtnShowModel = view.findViewById(R.id.btn_showmodel);
+            if (mIsPicModel) {
+                mBtnShowModel.setText("显示模式（文字）");
+            }else {
+                mBtnShowModel.setText("显示模式（图片）");
+            }
             mBtnAskPeace.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -757,6 +766,22 @@ public class MainActivity extends AppCompatActivity {
                 public void onClick(View view) {
                     showHelpDialog();
                     mMenuDialog.dismiss();
+                }
+            });
+            mBtnShowModel.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if(mIsPicModel) {
+                        mBtnShowModel.setText("显示模式（图片）");
+                        mIsPicModel = false;
+                        mGameView.setPicModel(false);
+                        SPUtil.putBoolean(MainActivity.this, "isPicModel", false);
+                    }else {
+                        mBtnShowModel.setText("显示模式（文字）");
+                        mIsPicModel = true;
+                        mGameView.setPicModel(true);
+                        SPUtil.putBoolean(MainActivity.this, "isPicModel", true);
+                    }
                 }
             });
         }

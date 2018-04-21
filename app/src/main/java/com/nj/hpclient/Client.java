@@ -199,7 +199,11 @@ public class Client implements Runnable {
                     //获取sd卡的路径，也就是设置下载存储的路径
                     String path = Environment.getExternalStorageDirectory().getAbsolutePath()
                             + File.separator + "HPClent.apk";
-                    raf = new RandomAccessFile(path, "rwd");
+                    File file = new File(path);
+                    if (file.exists()) {
+                        file.delete();
+                    }
+                    raf = new RandomAccessFile(file, "rwd");
                     InputStream is = mSocket.getInputStream();
                     int total = 0;
                     int len = -1;
