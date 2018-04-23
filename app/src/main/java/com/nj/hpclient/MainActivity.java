@@ -122,6 +122,11 @@ public class MainActivity extends AppCompatActivity {
     private VSView mVsS;
     private Button mBtnShowModel;
     private boolean mIsPicModel;
+    private AlertDialog mResultDialog;
+    private ImageView mIvResult;
+    private TextView mTvReason;
+    private Button mBtnBack;
+    private Button mBtnGoon;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -244,33 +249,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onGameOver(int n, String reason) {
-            if (n == 0) {
-                Toast.makeText(MainActivity.this, "和棋" + reason, Toast.LENGTH_SHORT).show();
-                mLocalUser.draw();
-            }else if(n == 1) {
-                if (mClient.mGame.getUser1().equals(mLocalUser)) {
-                    Toast.makeText(MainActivity.this, "恭喜你赢了！" + reason, Toast.LENGTH_SHORT).show();
-                    mLocalUser.win();
-                    Mp3.win.start();
-                }else {
-                    Toast.makeText(MainActivity.this, "很遗憾您输了！" + reason, Toast.LENGTH_SHORT).show();
-                    mLocalUser.defeat();
-                    Mp3.lose.start();
-                }
-            }else if(n == 2) {
-                if (mClient.mGame.getUser2().equals(mLocalUser)) {
-                    Toast.makeText(MainActivity.this, "恭喜你赢了！" + reason, Toast.LENGTH_SHORT).show();
-                    mLocalUser.win();
-                    Mp3.win.start();
-                }else {
-                    Toast.makeText(MainActivity.this, "很遗憾您输了！" + reason, Toast.LENGTH_SHORT).show();
-                    mLocalUser.defeat();
-                    Mp3.lose.start();
-                }
-            }
-            mClient.getUser().whichSide = 0;
-            saveUserToLocal(mLocalUser);
-            menuView();
+            showResultDialog(n, reason);
         }
 
         @Override
@@ -313,6 +292,56 @@ public class MainActivity extends AppCompatActivity {
                     break;
             }
         }
+    }
+
+    private void showResultDialog(int n, String reason) {
+        if (mResultDialog == null) {
+            LayoutInflater layoutInflater = LayoutInflater.from(this);
+            View resultView = layoutInflater.inflate(R.layout.dialog_result, null);
+            mIvResult = resultView.findViewById(R.id.iv_result);
+            mTvReason = resultView.findViewById(R.id.tv_reason);
+            mBtnBack = resultView.findViewById(R.id.btn_back);
+            mBtnGoon = resultView.findViewById(R.id.btn_goon);
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            mResultDialog = builder.setView(resultView)
+                    .setCancelable(false)
+                    .create();
+        }
+        mTvReason.setText(reason);
+        mBtnBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                menuView();
+                mResultDialog.dismiss();
+            }
+        });
+        if (n == 0) {
+            mIvResult.setImageResource(R.drawable.draw);
+            mLocalUser.draw();
+        }else if(n == 1) {
+            if (mClient.mGame.getUser1().equals(mLocalUser)) {
+                mIvResult.setImageResource(R.drawable.win);
+                mLocalUser.win();
+                Mp3.win.start();
+            }else {
+                mIvResult.setImageResource(R.drawable.fail);
+                mLocalUser.defeat();
+                Mp3.lose.start();
+            }
+        }else if(n == 2) {
+            if (mClient.mGame.getUser2().equals(mLocalUser)) {
+                mIvResult.setImageResource(R.drawable.win);
+                mLocalUser.win();
+                Mp3.win.start();
+            }else {
+                mIvResult.setImageResource(R.drawable.fail);
+                mLocalUser.defeat();
+                Mp3.lose.start();
+            }
+        }
+        mClient.getUser().whichSide = 0;
+        saveUserToLocal(mLocalUser);
+        mResultDialog.show();
     }
 
     private void showVSDialog() {

@@ -83,6 +83,9 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
     private Bitmap mSelectBElephant;
     private Bitmap mSelectRElephant;
     private boolean mIsPicModel;
+    private Bitmap mBg;
+    private Bitmap mChessBg;
+    private Bitmap mPk;
     //    //判断是那一边的，初始值是0，第一次点击翻开的是哪一方就是哪一方
 //    private int witchSide = 0;
 
@@ -148,8 +151,14 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
             mBoardLeftY = mDxBoard;
             mUsernameHeight = mBoardHeight + mDxBoard + 80;
         }
+        float sw_bg_width = mWidth * 1.0f / Img.BG.getWidth();
+        float sw_bg_height = mHeight * 1.0f / Img.BG.getHeight();
+        mBg = scaleBitmap(Img.BG, sw_bg_width, sw_bg_height);
         float sw = mChessRadius * 2 / Img.BELEPHANT.getHeight();
         float sw_select = mChessRadius * 2 / Img.SELECT_BELEPHANT.getHeight();
+        float sw_pk = Img.HEAD1.getHeight() * 1.0f / 2 / Img.PK.getHeight();
+        mPk = scaleBitmap(Img.PK, sw_pk);
+        mChessBg = scaleBitmap(Img.CHESSBG, sw);
         mBElephant = scaleBitmap(Img.BELEPHANT, sw);
         mBLion = scaleBitmap(Img.BLION, sw);
         mBtiger = scaleBitmap(Img.BTIGER, sw);
@@ -188,6 +197,12 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
     private Bitmap scaleBitmap(Bitmap bitmap, float sw) {
         Matrix matrix = new Matrix();
         matrix.postScale(sw, sw);
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+    }
+
+    private Bitmap scaleBitmap(Bitmap bitmap, float sw_w, float sw_h) {
+        Matrix matrix = new Matrix();
+        matrix.postScale(sw_w, sw_h);
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
     }
 
@@ -235,7 +250,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
     private void doDraw(Canvas canvas) {
         canvas.setDrawFilter(new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG));
         Paint paint = new Paint();
-        drawBG(canvas);
+        drawBG(canvas, paint);
         drawBoard(canvas, paint);
         drawChess(canvas, paint);
         drawSelect(canvas, paint);
@@ -348,6 +363,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
             mOtherHead = mClient.mGame.getOtherUser(mClient.getUser()).getHead();
             canvas.drawBitmap(Img.getHead(Integer.parseInt(mMyHead)), mDxBoard, mWidth + 2 * mDxBoard + 20, paint);
             canvas.drawBitmap(Img.getHead(Integer.parseInt(mOtherHead)), mWidth - mDxBoard - Img.getHead(Integer.parseInt(mOtherHead)).getWidth(), mWidth + 2 * mDxBoard + 20, paint);
+            canvas.drawBitmap(mPk, mWidth / 2 - mPk.getWidth() / 2, mWidth + 2 * mDxBoard + 20 + mPk.getHeight() / 2, paint);
         }else if(model == 2) {
             if(mClient.isBlack()) {
                 if (canSelect) {
@@ -587,7 +603,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
                             Bitmap chessImg = null;
                             //小于0.说明是没有翻开的牌
                             if (map[i][j] < 0) {
-                                drawChessBG(j, i, canvas, paint);
+                                drawChessBGPic(j, i, canvas, paint);
                             }else if(map[i][j] > 0) {
                                 if (select == null || i != select.y -1 || j != select.x - 1) {
                                     switch (map[i][j]) {
@@ -898,6 +914,14 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
         canvas.drawCircle(x, y, mChessRadius, paint);
     }
 
+    private void drawChessBGPic(int i, int j, Canvas canvas, Paint paint) {
+        float initX = mDxBoard + mChessRadius;
+        float initY = mDxBoard;
+        float x = initX + i * mDxChess + i * 2 * mChessRadius - mChessBg.getWidth() / 2;
+        float y = initY + j * mDxChess + j * 2 * mChessRadius;
+        canvas.drawBitmap(mChessBg, x, y, paint);
+    }
+
     /**
      * 画一个棋牌
      * @param chess
@@ -1029,7 +1053,8 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
         canvas.drawRect(mDxBoard + 4 * mDxOneBoard, mDxBoard + 8 *mDxOneBoard, mDxBoard + 5 * mDxOneBoard, mDxBoard + 9 *mDxOneBoard, paint);
     }
 
-    private void drawBG(Canvas canvas) {
+    private void drawBG(Canvas canvas, Paint paint) {
+        canvas.drawBitmap(mBg, 0 , 0, paint);
     }
 
     public void setCanSelect(boolean canSelect) {

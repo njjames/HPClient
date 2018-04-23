@@ -8,6 +8,9 @@ public class Img {
 	public static Bitmap BG;
 	public static Bitmap BOARD;
 	public static Bitmap OOS;
+	public static Bitmap PK;
+
+	public static Bitmap CHESSBG;
 	public static Bitmap BELEPHANT;
 	public static Bitmap BLION;
 	public static Bitmap BTIGER;
@@ -60,9 +63,9 @@ public class Img {
 	public static Bitmap HEAD14;
 
 	public static void init(Context context) {
-//		BG = BitmapFactory
-//				.decodeResource(context.getResources(), R.drawable.bg);
-//
+		BG = BitmapFactory.decodeResource(context.getResources(), R.drawable.game_bg);
+		CHESSBG = BitmapFactory.decodeResource(context.getResources(), R.drawable.chess_bg);
+		PK = BitmapFactory.decodeResource(context.getResources(), R.drawable.pk);
 //		BOARD = BitmapFactory.decodeResource(context.getResources(),
 //				R.drawable.board);
 //		OOS = BitmapFactory.decodeResource(context.getResources(),
