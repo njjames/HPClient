@@ -423,6 +423,10 @@ public class Client implements Runnable {
         sendLine("download");
     }
 
+    public void exit(int type) {
+        sendLine("exit:" + type);
+    }
+
 
     public interface ClientListener {
         //与服务器连接成功后的回调方法

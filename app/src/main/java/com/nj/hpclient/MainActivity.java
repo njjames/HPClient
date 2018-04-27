@@ -22,6 +22,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -34,6 +35,8 @@ import java.io.File;
 import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
+    private static final String TAG = "MainActivity";
+    
     public static final int GAME_VIEW = 1;
     public static final int LOGIN_VIEW = 2;
     public static final int SIGN_VIEW = 3;
@@ -127,6 +130,11 @@ public class MainActivity extends AppCompatActivity {
     private TextView mTvReason;
     private Button mBtnBack;
     private Button mBtnGoon;
+    private AlertDialog mExitDialog;
+    private boolean isGaming;
+    private TextView mTvLevel;
+    private Button mBtnLeveQ;
+    private AlertDialog mLevelQDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -221,6 +229,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onStart() {
             mGameView = new GameView(MainActivity.this, mClient, mCurrentModel, mIsPicModel, mGameViewListener);
+            isGaming = true;
             showVSDialog();
 //            gameView();
         }
@@ -249,6 +258,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onGameOver(int n, String reason) {
+            isGaming = false;
             showResultDialog(n, reason);
         }
 
@@ -311,6 +321,17 @@ public class MainActivity extends AppCompatActivity {
         mBtnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (mIsMusicOn) {
+                    try {
+                        if (Mp3.bgm2.isPlaying()) {
+                            Mp3.bgm2.stop();
+                            Mp3.bgm2.prepare();
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    Mp3.bgm1.start();
+                }
                 menuView();
                 mResultDialog.dismiss();
             }
@@ -440,7 +461,7 @@ public class MainActivity extends AppCompatActivity {
     private void login() {
         if (SPUtil.getBoolean(this, "music", true)) {
             mIsMusicOn = true;
-            Mp3.bgm.start();
+            Mp3.bgm1.start();
         }else {
             mIsMusicOn = false;
         }
@@ -643,9 +664,9 @@ public class MainActivity extends AppCompatActivity {
                         mBtnMusic.setBackgroundResource(R.drawable.music_off);
                         mIsMusicOn = false;
                         try {
-                            Mp3.bgm.stop();
+                            Mp3.bgm1.stop();
                             //在stop的时候prepare，不能再start之前prepare
-                            Mp3.bgm.prepare();
+                            Mp3.bgm1.prepare();
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -653,7 +674,7 @@ public class MainActivity extends AppCompatActivity {
                     }else {
                         mBtnMusic.setBackgroundResource(R.drawable.music_on);
                         mIsMusicOn = true;
-                        Mp3.bgm.start();
+                        Mp3.bgm1.start();
                         SPUtil.putBoolean(MainActivity.this, "music", true);
                     }
                     break;
@@ -675,8 +696,27 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.btn_setting:
                     showSettingDialog();
                     break;
+                case R.id.btn_level_q:
+                    showLevelQDialog();
+                    break;
             }
         }
+    }
+
+    private void showLevelQDialog() {
+        if (mLevelQDialog == null) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            mLevelQDialog = builder.setMessage(R.string.leve_q)
+                    .setTitle("等级信息")
+                    .setPositiveButton("好的", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            mLevelQDialog.dismiss();
+                        }
+                    })
+                    .create();
+        }
+        mLevelQDialog.show();
     }
 
     /**
@@ -850,6 +890,17 @@ public class MainActivity extends AppCompatActivity {
             thisView = GAME_VIEW;
 //            mGameView = new GameView(this, mClient, mCurrentModel, mGameViewListener);
             setContentView(mGameView);
+            if(mIsMusicOn) {
+                try {
+                    if (Mp3.bgm1.isPlaying()) {
+                        Mp3.bgm1.stop();
+                        Mp3.bgm1.prepare();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                Mp3.bgm2.start();
+            }
         }
     }
 
@@ -917,15 +968,20 @@ public class MainActivity extends AppCompatActivity {
             mBtnModel1 = findViewById(R.id.btn_model1);
             mBtnModel2 = findViewById(R.id.btn_model2);
             mBtnSetting = findViewById(R.id.btn_setting);
+            mTvLevel = findViewById(R.id.tv_level);
+            mBtnLeveQ = findViewById(R.id.btn_level_q);
             mBtnLogout.setOnClickListener(mClickListener);
             mBtnFindGame.setOnClickListener(mClickListener);
             mBtnMusic.setOnClickListener(mClickListener);
             mBtnModel1.setOnClickListener(mClickListener);
             mBtnModel2.setOnClickListener(mClickListener);
             mBtnSetting.setOnClickListener(mClickListener);
+            mBtnLeveQ.setOnClickListener(mClickListener);
+
         }
         //如果当前显示的就是这个界面，直接加载数据
         int head = Integer.parseInt(mLocalUser.getHead());
+        mTvLevel.setText(getLevel(mLocalUser.getScore()));
         mTvUsername.setText("用户名：" + mLocalUser.getName());
         mTvScore.setText("分数：" + mLocalUser.getScore());
         mTvVicount.setText("胜场：" + mLocalUser.getViCount());
@@ -937,6 +993,34 @@ public class MainActivity extends AppCompatActivity {
         }else {
             mBtnMusic.setBackgroundResource(R.drawable.music_off);
         }
+    }
+
+    private String getLevel(int score) {
+        String level = "";
+        if (score <= 10) {
+            level = "无名小卒";
+        } else if(score <= 20) {
+            level = "等闲之辈";
+        } else if(score <= 50) {
+            level = "纸上谈兵";
+        } else if(score <= 72) {
+            level = "养精蓄锐";
+        } else if(score <= 144) {
+            level = "运筹帷幄";
+        } else if(score <= 288) {
+            level = "一鸣惊人";
+        } else if(score <= 432) {
+            level = "脱颖而出";
+        } else if(score <= 576) {
+            level = "独挡一面";
+        } else if(score <= 864) {
+            level = "名不虚传";
+        } else if(score <= 1296) {
+            level = "雄才大略";
+        } else if(score <= 1728) {
+            level = "傲视群雄";
+        }
+        return level;
     }
 
     /**
@@ -981,7 +1065,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         if (mIsMusicOn) {
-            Mp3.bgm.pause();
+            Mp3.bgm1.pause();
+            if (thisView == GAME_VIEW) {
+                Mp3.bgm2.pause();
+            }
         }
     }
 
@@ -989,16 +1076,60 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if (mIsMusicOn) {
-            Mp3.bgm.start();
+            Mp3.bgm1.start();
+            if (thisView == GAME_VIEW) {
+                Mp3.bgm2.start();
+            }
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        Log.d(TAG, "onBackPressed: ");
+        if (mExitDialog == null) {
+            LayoutInflater layoutInflater = LayoutInflater.from(this);
+            View exitView = layoutInflater.inflate(R.layout.dialog_exit, null);
+            final TextView tvExit = exitView.findViewById(R.id.tv_exit);
+            Button btnExitCancel = exitView.findViewById(R.id.btn_exit_cancel);
+            Button btnExitOk = exitView.findViewById(R.id.btn_exit_ok);
+            if (isGaming) {
+                tvExit.setText("正在游戏中，退出判负！");
+            }else {
+                tvExit.setText("您确认退出吗！");
+            }
+            mExitDialog = new AlertDialog.Builder(this).setView(exitView).create();
+            btnExitCancel.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    mExitDialog.dismiss();
+                }
+            });
+            btnExitOk.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (isGaming) {
+                        mClient.exit(1);
+                    }else {
+                        mClient.exit(0);
+                    }
+                    mExitDialog.dismiss();
+                    finish();
+                }
+            });
+        }
+        mExitDialog.show();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (Mp3.bgm.isPlaying()) {
-            Mp3.bgm.stop();
+        if (Mp3.bgm1.isPlaying()) {
+            Mp3.bgm1.stop();
         }
-        Mp3.bgm.release();
+        Mp3.bgm1.release();
+        if (Mp3.bgm2.isPlaying()) {
+            Mp3.bgm2.stop();
+        }
+        Mp3.bgm2.release();
     }
 }

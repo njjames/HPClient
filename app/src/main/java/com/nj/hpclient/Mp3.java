@@ -10,6 +10,8 @@ import android.media.MediaPlayer;
 public class Mp3 {
 
     public static MediaPlayer bgm;
+    public static MediaPlayer bgm1;
+    public static MediaPlayer bgm2;
     public static MediaPlayer win;
     public static MediaPlayer lose;
     public static MediaPlayer elephant;
@@ -26,8 +28,12 @@ public class Mp3 {
     public static MediaPlayer eatRiver;
 
     public static void init(Context context) {
-        bgm = MediaPlayer.create(context, R.raw.bgm);
-        bgm.setLooping(true);
+//        bgm = MediaPlayer.create(context, R.raw.bgm);
+//        bgm.setLooping(true);
+        bgm1 = MediaPlayer.create(context, R.raw.bgm1);
+        bgm1.setLooping(true);
+        bgm2 = MediaPlayer.create(context, R.raw.bgm2);
+        bgm2.setLooping(true);
         win = MediaPlayer.create(context, R.raw.gamewin);
         lose = MediaPlayer.create(context, R.raw.gamelose);
         elephant = MediaPlayer.create(context, R.raw.elephant);
